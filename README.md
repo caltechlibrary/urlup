@@ -14,6 +14,8 @@ urlup
 * [plac](https://pypi.python.org/pypi/plac), a command line arguments parser.
 * [termcolor](https://pypi.python.org/pypi/termcolor), for color-coding text printed to the terminal
 
+### ⓶&nbsp;&nbsp; _Download and install urlup_
+
 To install `urlup`, clone the git repository to a location on your computer.
 
 ▶︎ Basic operation
