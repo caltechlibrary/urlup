@@ -48,7 +48,7 @@ The typical usage is to provide it with a list of URLs in a file (one per line) 
 
 Here is a screen cast to demonstrate. Click on the following image:
 
-[![demo](.graphics/urlup-asciinema.png)](https://asciinema.org/a/s14GQit2kI4eSiX1sluRjtINO?autoplay=1)
+[![demo](.graphics/urlup-asciinema.png)](https://asciinema.org/a/Q90dPtCEO3D1iQvYVaSvqoecW?autoplay=1)
 
 
 ⁇ Getting help and support
