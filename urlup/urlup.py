@@ -23,6 +23,7 @@ import http.client
 from   http.client import responses as http_responses
 import os
 import sys
+import textwrap
 from   time import time, sleep
 from   urllib.parse import urlsplit
 
@@ -31,6 +32,8 @@ try:
     sys.path.append(os.path.join(thisdir, '../..'))
 except:
     sys.path.append('../..')
+
+from commonpy import http_code
 
 import urlup
 from urlup.messages import color, msg
@@ -70,7 +73,7 @@ trying and exits with an error.
 # Main functions.
 # .............................................................................
 
-def updated_urls(url_list, colorize = True, quiet = False):
+def updated_urls(url_list, colorize = True, quiet = False, verbose = False):
     results = []
     for url in url_list:
         url = url.strip()
@@ -84,8 +87,16 @@ def updated_urls(url_list, colorize = True, quiet = False):
             try:
                 (old, new, code) = url_data(url)
                 if not quiet:
-                    msg('{} ==> {} [{}]'.format(old, new, code),
-                        severity(code), colorize)
+                    if verbose:
+                        details = '[status code {} = {}]'.format(code,
+                            http_code.description(code))
+                        text = textwrap.fill(details, initial_indent = '   ',
+                                             subsequent_indent = '   ')
+                        msg('{} ==> {}\n{}'.format(old, new, text),
+                            severity(code), colorize)
+                    else:
+                        msg('{} ==> {} [{}]'.format(old, new, code),
+                            severity(code), colorize)
                 results.append((old, new, code))
             except Exception as err:
                 # If we fail, try again, in case it's a network interruption
