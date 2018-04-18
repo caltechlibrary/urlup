@@ -1,0 +1,3 @@
+[submodule "commonpy"]
+	path = commonpy
+	url = git@github.com:caltechlibrary/commonpy.git
