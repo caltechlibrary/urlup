@@ -61,3 +61,9 @@ If you find an issue, please submit it in [the GitHub issue tracker](https://git
 ---------------------
 
 Copyright (C) 2018, Caltech.  This software is freely distributed under a BSD/MIT type license.  Please see the [LICENSE](LICENSE) file for more information.
+    
+<div align="center">
+  <a href="https://www.caltech.edu">
+    <img width="100" height="100" src=".graphics/caltech-round.svg">
+  </a>
+</div>
