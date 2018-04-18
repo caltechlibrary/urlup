@@ -123,7 +123,7 @@ def url_data(url):
         sleep(1)                        # Arbitrary.
         final_data = url_data(url)
         return (url, final_data[1], response.status)
-    elif response.status in [301, 302, 308]:
+    elif response.status in [301, 302, 303, 308]:
         # Redirection.  Start from the top with new URL.
         new_url = response.getheader('Location')
         if __debug__: log('New url: {}'.format(new_url))
