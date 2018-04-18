@@ -26,12 +26,14 @@ from urlup.messages import color, msg
     input    = ('input file to read',                                'option', 'i'),
     output   = ('output file to write',                              'option', 'o'),
     quiet    = ('do not print messages while working',               'flag',   'q'),
-    version  = ('print version info and exit',                       'flag',   'v'),
+    verbose  = ('display more information while running',            'flag',   'v'),
     no_color = ('do not color-code terminal output (default: do)',   'flag',   'C'),
+    version  = ('print version info and exit',                       'flag',   'V'),
     urls     = 'URLs to check',
 )
 
-def cli_main(input=None, output=None, quiet=False, version=False, no_color=False, *urls):
+def cli_main(input=None, output=None, quiet=False, verbose=False,
+             no_color=False, version=False, *urls):
     '''Find the ultimate destination for URLs after following redirections.
 
 If the command-line option -i is not provided, this program assumes that the
@@ -68,7 +70,7 @@ the terminal as it processes URLs, unless the option -q is given.
         raise SystemExit(color('Need a file or URLs as argument', 'error', colorize))
 
     if not output:
-        msg("No output file given -- results won't be saved.", 'warn', colorize)
+        msg("No output file specified; results won't be saved.", 'warn', colorize)
     else:
         msg('Output will be written to {}'.format(output, 'info', colorize))
 
@@ -79,18 +81,18 @@ the terminal as it processes URLs, unless the option -q is given.
                 msg('Reading URLs from {}'.format(input), 'info', colorize)
             with open(input) as f:
                 lines = map(str.rstrip, f.readlines())
-                results = updated_urls(lines, colorize, quiet)
+                results = updated_urls(lines, colorize, quiet, verbose)
         elif os.path.exists(os.path.join(os.getcwd(), file)):
             full_path = os.path.join(os.getcwd(), file)
             if not quiet:
                 msg('Reading URLs from {}'.format(full_path), 'info', colorize)
             with open(full_path) as f:
                 lines = map(str.rstrip, f.readlines())
-                results = updated_urls(lines, colorize, quiet)
+                results = updated_urls(lines, colorize, quiet, verbose)
         else:
             raise ValueError('Cannot find file "{}"'.format(input))
     else:
-        results = updated_urls(urls, colorize, quiet)
+        results = updated_urls(urls, colorize, quiet, verbose)
 
     if not results:
         msg('No results returned.')
