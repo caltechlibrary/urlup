@@ -20,7 +20,7 @@ from .__version__ import __license__, __copyright__
 
 # Main modules.
 from .urlup import updated_urls
-from .cli_main import cli_main
 
 # Supporting modules.
 from .messages import msg, color
+from .http_code import description
