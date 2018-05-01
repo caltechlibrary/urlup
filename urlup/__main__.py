@@ -1,5 +1,16 @@
 '''
-cli_main: main command-line interface to urlup
+__main__: main command-line interface to urlup
+
+Authors
+-------
+
+Michael Hucka <mhucka@caltech.edu>
+
+Copyright
+---------
+
+Copyright (c) 2018 by the California Institute of Technology.  This code is
+open-source software.  Please see the file "LICENSE" for more information.
 '''
 
 import csv
@@ -11,9 +22,6 @@ try:
 except:
     pass
 
-# Allow this program to be executed directly from the 'bin' directory.
-sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-
 import urlup
 from urlup import updated_urls
 from urlup.messages import color, msg
@@ -23,17 +31,17 @@ from urlup.messages import color, msg
 # ......................................................................
 
 @plac.annotations(
-    input    = ('input file to read',                                'option', 'i'),
-    output   = ('output file to write',                              'option', 'o'),
-    quiet    = ('do not print messages while working',               'flag',   'q'),
-    verbose  = ('display more information while running',            'flag',   'v'),
-    no_color = ('do not color-code terminal output (default: do)',   'flag',   'C'),
-    version  = ('print version info and exit',                       'flag',   'V'),
+    input    = ('input file to read',                              'option', 'i'),
+    output   = ('output file to write',                            'option', 'o'),
+    quiet    = ('do not print messages while working',             'flag',   'q'),
+    verbose  = ('display more information while running',          'flag',   'v'),
+    no_color = ('do not color-code terminal output (default: do)', 'flag',   'C'),
+    version  = ('print version info and exit',                     'flag',   'V'),
     urls     = 'URLs to check',
 )
 
-def cli_main(input=None, output=None, quiet=False, verbose=False,
-             no_color=False, version=False, *urls):
+def main(input=None, output=None, quiet=False, verbose=False,
+         no_color=False, version=False, *urls):
     '''Find the ultimate destination for URLs after following redirections.
 
 If the command-line option -i is not provided, this program assumes that the
@@ -106,6 +114,12 @@ the terminal as it processes URLs, unless the option -q is given.
             csvwriter.writerows(results)
 
     msg('Done.', 'info', colorize)
+
+
+# The following allows users to invoke this using "python3 -m urlup".
+
+if __name__ == '__main__':
+    plac.call(main)
 
 
 # For Emacs users
