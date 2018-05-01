@@ -23,4 +23,4 @@ from .urlup import updated_urls
 
 # Supporting modules.
 from .messages import msg, color
-from .http_code import description
+from .http_code import code_meaning

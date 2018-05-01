@@ -35,7 +35,7 @@ except:
 
 import urlup
 from urlup.messages import color, msg
-from urlup.http_code import description
+from urlup.http_code import code_meaning
 
 # NOTE: to turn on debugging, make sure python -O was *not* used to start
 # python, then set the logging level to DEBUG *before* loading this module.
@@ -87,7 +87,7 @@ def updated_urls(url_list, colorize = True, quiet = False, verbose = False):
                 (old, new, code) = url_data(url)
                 if not quiet:
                     if verbose:
-                        desc = http_code.description(code)
+                        desc = code_meaning(code)
                         details = '[status code {} = {}]'.format(code, desc)
                         text = textwrap.fill(details, initial_indent = '   ',
                                              subsequent_indent = '   ')

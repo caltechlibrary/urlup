@@ -148,7 +148,7 @@ http_meanings = {
 # Utility functions.
 # .............................................................................
 
-def description(status_code):
+def code_meaning(status_code):
     '''Return a textual description of the given status_code value.'''
     if not isinstance(status_code, int):
         raise ValueError('Status code must be an integer')
