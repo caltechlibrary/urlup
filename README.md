@@ -15,16 +15,18 @@ Sometimes we have a list of URLs and we need to find out the ultimate destinatio
 ✺ Installation instructions
 ---------------------------
 
-### ⓵&nbsp;&nbsp; _Check and install dependencies_
+The following is probably the simplest and most direct way to install `urlup` on your computer:
+```sh
+sudo pip3 install git+https://github.com/caltechlibrary/urlup.git
+```
 
-`urlup` uses some Python modules that may or may not be installed in your Python environment.  Depending on the approach you use to install Spiral, you may or may not need to install them separately:
-
-* [plac](https://pypi.python.org/pypi/plac), a command line arguments parser.
-* [termcolor](https://pypi.python.org/pypi/termcolor), for color-coding text printed to the terminal
-
-### ⓶&nbsp;&nbsp; _Download and install urlup_
-
-To install `urlup`, clone the git repository to a location on your computer.
+Alternatively, you can clone this GitHub repository and then run `setup.py`:
+```sh
+git clone https://github.com/caltechlibrary/urlup.git
+cd urlup
+sudo python3 -m pip install .
+```
+Both of these installation approaches should automatically install some Python dependencies that `urlup` relies upon, namely [plac](https://pypi.python.org/pypi/plac) and [termcolor](https://pypi.python.org/pypi/termcolor).
 
 ▶︎ Basic operation
 ------------------
@@ -34,7 +36,7 @@ _urlup_ provides a command-line utility as well as a library.  The command-line 
 For a simple, quick check of one or two URLs, you can simply provide the URLs on the command line:
 
 ```
-# ./bin/urlup http://sbml.org
+# urlup http://sbml.org
 No output file given -- results won't be saved.
 http://sbml.org ==> http://sbml.org/Main_Page [301]
 Done.
@@ -43,7 +45,7 @@ Done.
 The typical usage is to provide it with a list of URLs in a file (one per line) with the `-i` option, and to tell it to write the results to a CSV file with the `-o` option.
 
 ```
-# ./bin/urlup  -i original_urls.txt  -o final_urls.csv
+# urlup  -i original_urls.txt  -o final_urls.csv
 ```
 
 Here is a screen cast to demonstrate. Click on the following image:
