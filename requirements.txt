@@ -1,2 +1,2 @@
-termcolor==1.1.0
-plac==0.9.6
+termcolor>=1.1.0
+plac>=0.9.6
