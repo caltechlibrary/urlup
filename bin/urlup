@@ -20,5 +20,8 @@ except:
     sys.path.append('..')
 
 # Hand over to the command line interface.
-from urlup import cli_main
-plac.call(cli_main)
+import urlup
+from urlup.__main__ import main as main
+
+if __name__ == "__main__":
+    plac.call(main)
