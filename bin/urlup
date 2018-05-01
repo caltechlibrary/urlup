@@ -11,7 +11,13 @@
 import os
 import sys
 import plac
-sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+# Allow this program to be executed directly from the 'bin' directory.
+try:
+    thisdir = os.path.dirname(os.path.abspath(__file__))
+    sys.path.append(os.path.join(thisdir, '..'))
+except:
+    sys.path.append('..')
 
 # Hand over to the command line interface.
 from urlup import cli_main
