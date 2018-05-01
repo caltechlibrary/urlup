@@ -18,4 +18,5 @@ import logging
 logging.basicConfig(level=logging.DEBUG, format='')
 
 import urlup
-plac.call(urlup.cli_main)
+from urlup.__main__ import main as main
+plac.call(main)
