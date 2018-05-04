@@ -19,6 +19,7 @@ software is made freely available under the terms specified in the LICENSE file
 provided with this software.
 '''
 
+from   collections import Iterable
 import http.client
 from   http.client import responses as http_responses
 import os
@@ -72,43 +73,54 @@ trying and exits with an error.
 # Main functions.
 # .............................................................................
 
-def updated_urls(url_list, colorize = True, quiet = False, verbose = False):
-    results = []
-    for url in url_list:
-        url = url.strip()
-        if not url:
-            continue
-        retry = True
-        failures = 0
-        sleep_time = 2
-        while retry and failures < _MAX_RETRIES:
-            retry = False
-            try:
-                (old, new, code) = url_data(url)
-                if not quiet:
-                    if verbose:
-                        desc = code_meaning(code)
-                        details = '[status code {} = {}]'.format(code, desc)
-                        text = textwrap.fill(details, initial_indent = '   ',
-                                             subsequent_indent = '   ')
-                        msg('{} ==> {}\n{}'.format(old, new, text),
-                            severity(code), colorize)
-                    else:
-                        msg('{} ==> {} [{}]'.format(old, new, code),
-                            severity(code), colorize)
-                results.append((old, new, code))
-            except Exception as err:
-                # If we fail, try again, in case it's a network interruption
-                failures += 1
-                if not quiet:
-                    msg('{} problem: {}'.format(url, err), 'warn', colorize)
-                    msg('Retrying in {}s ...'.format(sleep_time), 'warn', colorize)
-                sleep(sleep_time)
-                sleep_time *= _SLEEP_FACTOR
-                retry = True
+def _url_tuple(url, colorize = True, quiet = False, verbose = False):
+    '''Update one URL and return a tuple of (old URL, new URL).'''
+    url = url.strip()
+    if not url:
+        return ()
+    retry = True
+    failures = 0
+    sleep_time = 2
+    while retry and failures < _MAX_RETRIES:
+        retry = False
+        try:
+            (old, new, code) = url_data(url)
+            if not quiet:
+                if verbose:
+                    desc = code_meaning(code)
+                    details = '[status code {} = {}]'.format(code, desc)
+                    text = textwrap.fill(details, initial_indent = '   ',
+                                         subsequent_indent = '   ')
+                    msg('{} ==> {}\n{}'.format(old, new, text),
+                        severity(code), colorize)
+                else:
+                    msg('{} ==> {} [{}]'.format(old, new, code),
+                        severity(code), colorize)
+            return((old, new, code))
+        except Exception as err:
+            # If we fail, try again, in case it's a network interruption
+            failures += 1
+            if not quiet:
+                msg('{} problem: {}'.format(url, err), 'warn', colorize)
+                msg('Retrying in {}s ...'.format(sleep_time), 'warn', colorize)
+            sleep(sleep_time)
+            sleep_time *= _SLEEP_FACTOR
+            retry = True
     if failures >= _MAX_RETRIES:
         raise SystemExit(color('Exceeded maximum failures. Quitting.'))
-    return results
+    return ()
+
+
+def updated_urls(url_or_list, colorize = True, quiet = False, verbose = False):
+    '''Update one URL or list of URLs.  If given a single URL, it returns a
+    tuple (old URL, new URL); if given a list of URLs, it returns a list of
+    tuples of the same form.
+    '''
+    if (isinstance(url_or_list, list) or isinstance(url_or_list, tuple)
+        or isinstance(url_or_list, Iterable)):
+        return [_url_tuple(url, colorize, quiet, verbose) for url in url_or_list]
+    else:
+        return _url_tuple(url_or_list, colorize, quiet, verbose)
 
 
 def url_data(url):
