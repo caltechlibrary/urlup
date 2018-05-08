@@ -73,18 +73,19 @@ trying and exits with an error.
 # Main functions.
 # .............................................................................
 
-def updated_urls(urls, colorize = True, quiet = False, explain = False):
+def updated_urls(urls, headers = None, colorize = True, quiet = False, explain = False):
     '''Update one URL or a list of URLs.  If given a single URL, it returns a
     tuple (old URL, new URL); if given a list of URLs, it returns a list of
     tuples of the same form.
     '''
-    if isinstance(urls, (list, tuple, Iterable)):
-        return [_url_tuple(url, colorize, quiet, explain) for url in urls]
+    if isinstance(urls, (list, tuple, Iterable)) and not isinstance(urls, str):
+        import pdb; pdb.set_trace()
+        return [_url_tuple(url, headers, colorize, quiet, explain) for url in urls]
     else:
-        return _url_tuple(urls, colorize, quiet, explain)
+        return _url_tuple(urls, headers, colorize, quiet, explain)
 
 
-def _url_tuple(url, colorize = True, quiet = False, explain = False):
+def _url_tuple(url, headers = None, colorize = True, quiet = False, explain = False):
     '''Update one URL and return a tuple of (old URL, new URL).'''
     url = url.strip()
     if not url:
@@ -95,8 +96,7 @@ def _url_tuple(url, colorize = True, quiet = False, explain = False):
     while retry and failures < _MAX_RETRIES:
         retry = False
         try:
-            (old, new, code) = _url_data(url)
-
+            (old, new, code) = _url_data(url, headers)
             if not quiet:
                 if explain:
                     desc = code_meaning(code)
@@ -123,14 +123,17 @@ def _url_tuple(url, colorize = True, quiet = False, explain = False):
     return ()
 
 
-def _url_data(url):
+def _url_data(url, headers):
     if __debug__: log('Looking up {}'.format(url))
     parts = urlsplit(url)
     if parts.scheme == 'https':
         conn = http.client.HTTPSConnection(parts.netloc, timeout=_NETWORK_TIMEOUT)
     else:
         conn = http.client.HTTPConnection(parts.netloc, timeout=_NETWORK_TIMEOUT)
-    conn.request("GET", url, {})
+    if headers:
+        conn.request("GET", url, {}, headers)
+    else:
+        conn.request("GET", url, {})
     response = conn.getresponse()
     if __debug__: log('Got response code {}'.format(response.status))
     if response.status == 200:
