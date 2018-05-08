@@ -78,8 +78,7 @@ def updated_urls(urls, colorize = True, quiet = False):
     tuple (old URL, new URL); if given a list of URLs, it returns a list of
     tuples of the same form.
     '''
-    if (isinstance(urls, list) or isinstance(urls, tuple)
-        or isinstance(urls, Iterable)):
+    if isinstance(urls, (list, tuple, Iterable)):
         return [_url_tuple(url, colorize, quiet) for url in urls]
     else:
         return _url_tuple(urls, colorize, quiet)
