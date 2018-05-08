@@ -21,6 +21,7 @@ try:
     from termcolor import colored
 except:
     pass
+from   uritools import urisplit
 
 import urlup
 from urlup import updated_urls
@@ -39,8 +40,8 @@ from urlup.messages import color, msg
     urls     = 'URLs to check',
 )
 
-def main(input=None, output=None, quiet=False,
-         no_color=False, version=False, *urls):
+def main(input=None, output=None, quiet=False, no_color=False,
+         version=False, *urls):
     '''Find the ultimate destination for URLs after following redirections.
 
 If the command-line option -i is not provided, this program assumes that the
@@ -97,8 +98,13 @@ the terminal as it processes URLs, unless the option -q is given.
                 lines = map(str.rstrip, f.readlines())
                 results = updated_urls(lines, colorize, quiet)
         else:
-            raise ValueError('Cannot find file "{}"'.format(input))
+            raise SystemExit(color('Cannot find file "{}"'.format(input), 'error', colorize))
     else:
+        # Not given a file.  Do the arguments look like URLs?  If so, use them.
+        parts = urisplit(urls[0])
+        if not parts.scheme:
+            raise SystemExit(color('{} does not appear to be a proper URI'.format(urls[0]),
+                                   'error', colorize))
         results = updated_urls(urls, colorize, quiet)
 
     if not results:
