@@ -73,6 +73,18 @@ trying and exits with an error.
 # Main functions.
 # .............................................................................
 
+def updated_urls(url_or_list, colorize = True, quiet = False):
+    '''Update one URL or list of URLs.  If given a single URL, it returns a
+    tuple (old URL, new URL); if given a list of URLs, it returns a list of
+    tuples of the same form.
+    '''
+    if (isinstance(url_or_list, list) or isinstance(url_or_list, tuple)
+        or isinstance(url_or_list, Iterable)):
+        return [_url_tuple(url, colorize, quiet) for url in url_or_list]
+    else:
+        return _url_tuple(url_or_list, colorize, quiet)
+
+
 def _url_tuple(url, colorize = True, quiet = False):
     '''Update one URL and return a tuple of (old URL, new URL).'''
     url = url.strip()
@@ -84,7 +96,7 @@ def _url_tuple(url, colorize = True, quiet = False):
     while retry and failures < _MAX_RETRIES:
         retry = False
         try:
-            (old, new, code) = url_data(url)
+            (old, new, code) = _url_data(url)
             if not quiet:
                 desc = code_meaning(code)
                 details = '[status code {} = {}]'.format(code, desc)
@@ -107,19 +119,7 @@ def _url_tuple(url, colorize = True, quiet = False):
     return ()
 
 
-def updated_urls(url_or_list, colorize = True, quiet = False):
-    '''Update one URL or list of URLs.  If given a single URL, it returns a
-    tuple (old URL, new URL); if given a list of URLs, it returns a list of
-    tuples of the same form.
-    '''
-    if (isinstance(url_or_list, list) or isinstance(url_or_list, tuple)
-        or isinstance(url_or_list, Iterable)):
-        return [_url_tuple(url, colorize, quiet) for url in url_or_list]
-    else:
-        return _url_tuple(url_or_list, colorize, quiet)
-
-
-def url_data(url):
+def _url_data(url):
     if __debug__: log('Looking up {}'.format(url))
     parts = urlsplit(url)
     if parts.scheme == 'https':
@@ -139,13 +139,13 @@ def url_data(url):
         # process or server handles the request, or for batch processing."
         if __debug__: log('Pausing & trying')
         sleep(1)                        # Arbitrary.
-        final_data = url_data(url)
+        final_data = _url_data(url)
         return (url, final_data[1], response.status)
     elif response.status in [301, 302, 303, 308]:
         # Redirection.  Start from the top with new URL.
         new_url = response.getheader('Location')
         if __debug__: log('New url: {}'.format(new_url))
-        final_data = url_data(new_url)
+        final_data = _url_data(new_url)
         return (url, final_data[1], response.status)
     else:
         return (url, None, response.status)
