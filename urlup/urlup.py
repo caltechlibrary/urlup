@@ -73,16 +73,16 @@ trying and exits with an error.
 # Main functions.
 # .............................................................................
 
-def updated_urls(url_or_list, colorize = True, quiet = False):
-    '''Update one URL or list of URLs.  If given a single URL, it returns a
+def updated_urls(urls, colorize = True, quiet = False):
+    '''Update one URL or a list of URLs.  If given a single URL, it returns a
     tuple (old URL, new URL); if given a list of URLs, it returns a list of
     tuples of the same form.
     '''
-    if (isinstance(url_or_list, list) or isinstance(url_or_list, tuple)
-        or isinstance(url_or_list, Iterable)):
-        return [_url_tuple(url, colorize, quiet) for url in url_or_list]
+    if (isinstance(urls, list) or isinstance(urls, tuple)
+        or isinstance(urls, Iterable)):
+        return [_url_tuple(url, colorize, quiet) for url in urls]
     else:
-        return _url_tuple(url_or_list, colorize, quiet)
+        return _url_tuple(urls, colorize, quiet)
 
 
 def _url_tuple(url, colorize = True, quiet = False):
