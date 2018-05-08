@@ -51,7 +51,7 @@ http_meanings = {
 
     300 : (HTTPStatus.MULTIPLE_CHOICES.phrase, "The request has more than one possible response. The user-agent or user should choose one of them. There is no standardized way of choosing one of the responses."),
 
-    301 : (HTTPStatus.MOVED_PERMANENTLY.phrase, "This response code means that the URI of the requested resource has been changed. Probably, the new URI would be given in the response."),
+    301 : (HTTPStatus.MOVED_PERMANENTLY.phrase, "This response code means that the URI of the requested resource has been changed. The new URI is probably given in the response."),
 
     302 : (HTTPStatus.FOUND.phrase, "This response code means that the URI of requested resource has been changed temporarily. New changes in the URI might be made in the future. Therefore, this same URI should be used by the client in future requests."),
 
