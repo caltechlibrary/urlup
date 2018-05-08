@@ -73,18 +73,18 @@ trying and exits with an error.
 # Main functions.
 # .............................................................................
 
-def updated_urls(urls, colorize = True, quiet = False):
+def updated_urls(urls, colorize = True, quiet = False, explain = False):
     '''Update one URL or a list of URLs.  If given a single URL, it returns a
     tuple (old URL, new URL); if given a list of URLs, it returns a list of
     tuples of the same form.
     '''
     if isinstance(urls, (list, tuple, Iterable)):
-        return [_url_tuple(url, colorize, quiet) for url in urls]
+        return [_url_tuple(url, colorize, quiet, explain) for url in urls]
     else:
-        return _url_tuple(urls, colorize, quiet)
+        return _url_tuple(urls, colorize, quiet, explain)
 
 
-def _url_tuple(url, colorize = True, quiet = False):
+def _url_tuple(url, colorize = True, quiet = False, explain = False):
     '''Update one URL and return a tuple of (old URL, new URL).'''
     url = url.strip()
     if not url:
@@ -96,13 +96,18 @@ def _url_tuple(url, colorize = True, quiet = False):
         retry = False
         try:
             (old, new, code) = _url_data(url)
+
             if not quiet:
-                desc = code_meaning(code)
-                details = '[status code {} = {}]'.format(code, desc)
-                text = textwrap.fill(details, initial_indent = '   ',
-                                     subsequent_indent = '   ')
-                msg('{} ==> {}\n{}'.format(old, new, text),
-                    severity(code), colorize)
+                if explain:
+                    desc = code_meaning(code)
+                    details = '[status code {} = {}]'.format(code, desc)
+                    text = textwrap.fill(details, initial_indent = '   ',
+                                         subsequent_indent = '   ')
+                    msg('{} ==> {}\n{}'.format(old, new, text),
+                        severity(code), colorize)
+                else:
+                    msg('{} ==> {} [{}]'.format(old, new, code),
+                        severity(code), colorize)
             return((old, new, code))
         except Exception as err:
             # If we fail, try again, in case it's a network interruption
