@@ -32,6 +32,7 @@ from urlup.messages import color, msg
 # ......................................................................
 
 @plac.annotations(
+    explain  = ('print explanations of HTTP codes',                'flag',   'e'),
     input    = ('input file to read',                              'option', 'i'),
     output   = ('output file to write',                            'option', 'o'),
     quiet    = ('do not print messages while working',             'flag',   'q'),
@@ -40,7 +41,7 @@ from urlup.messages import color, msg
     urls     = 'URLs to check',
 )
 
-def main(input=None, output=None, quiet=False, no_color=False,
+def main(input=None, output=None, explain = False, quiet=False, no_color=False,
          version=False, *urls):
     '''Find the ultimate destination for URLs after following redirections.
 
@@ -77,9 +78,9 @@ the terminal as it processes URLs, unless the option -q is given.
     if not input and not urls:
         raise SystemExit(color('Need a file or URLs as argument', 'error', colorize))
 
-    if not output:
+    if not output and not quiet:
         msg("No output file specified; results won't be saved.", 'warn', colorize)
-    else:
+    elif not quiet:
         msg('Output will be written to {}'.format(output, 'info', colorize))
 
     results = []
@@ -89,14 +90,14 @@ the terminal as it processes URLs, unless the option -q is given.
                 msg('Reading URLs from {}'.format(input), 'info', colorize)
             with open(input) as f:
                 lines = map(str.rstrip, f.readlines())
-                results = updated_urls(lines, colorize, quiet)
+                results = updated_urls(lines, colorize, quiet, explain)
         elif os.path.exists(os.path.join(os.getcwd(), file)):
             full_path = os.path.join(os.getcwd(), file)
             if not quiet:
                 msg('Reading URLs from {}'.format(full_path), 'info', colorize)
             with open(full_path) as f:
                 lines = map(str.rstrip, f.readlines())
-                results = updated_urls(lines, colorize, quiet)
+                results = updated_urls(lines, colorize, quiet, explain)
         else:
             raise SystemExit(color('Cannot find file "{}"'.format(input), 'error', colorize))
     else:
@@ -105,7 +106,7 @@ the terminal as it processes URLs, unless the option -q is given.
         if not parts.scheme:
             raise SystemExit(color('{} does not appear to be a proper URI'.format(urls[0]),
                                    'error', colorize))
-        results = updated_urls(urls, colorize, quiet)
+        results = updated_urls(urls, colorize, quiet, explain)
 
     if not results:
         msg('No results returned.')
@@ -118,7 +119,8 @@ the terminal as it processes URLs, unless the option -q is given.
             csvwriter = csv.writer(out, delimiter=',')
             csvwriter.writerows(results)
 
-    msg('Done.', 'info', colorize)
+    if not quiet:
+        msg('Done.', 'info', colorize)
 
 
 # The following allows users to invoke this using "python3 -m urlup".
