@@ -73,19 +73,19 @@ trying and exits with an error.
 # Main functions.
 # .............................................................................
 
-def updated_urls(urls, headers = None, colorize = True, quiet = False, explain = False):
+def updated_urls(urls, headers = None, quiet = True, explain = False, colorize = False):
     '''Update one URL or a list of URLs.  If given a single URL, it returns a
     tuple (old URL, new URL); if given a list of URLs, it returns a list of
     tuples of the same form.
     '''
     if isinstance(urls, (list, tuple, Iterable)) and not isinstance(urls, str):
         import pdb; pdb.set_trace()
-        return [_url_tuple(url, headers, colorize, quiet, explain) for url in urls]
+        return [_url_tuple(url, headers, quiet, explain, colorize) for url in urls]
     else:
-        return _url_tuple(urls, headers, colorize, quiet, explain)
+        return _url_tuple(urls, headers, quiet, explain, colorize)
 
 
-def _url_tuple(url, headers = None, colorize = True, quiet = False, explain = False):
+def _url_tuple(url, headers = None, quiet = False, explain = False, colorize = True):
     '''Update one URL and return a tuple of (old URL, new URL).'''
     url = url.strip()
     if not url:
