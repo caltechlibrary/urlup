@@ -85,7 +85,7 @@ def updated_urls(urls, headers = None, quiet = True, explain = False, colorize =
         return _url_tuple(urls, headers, quiet, explain, colorize)
 
 
-def _url_tuple(url, headers = None, quiet = False, explain = False, colorize = True):
+def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = False):
     '''Update one URL and return a tuple of (old URL, new URL).'''
     url = url.strip()
     if not url:
