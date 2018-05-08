@@ -34,13 +34,12 @@ from urlup.messages import color, msg
     input    = ('input file to read',                              'option', 'i'),
     output   = ('output file to write',                            'option', 'o'),
     quiet    = ('do not print messages while working',             'flag',   'q'),
-    verbose  = ('display more information while running',          'flag',   'v'),
     no_color = ('do not color-code terminal output (default: do)', 'flag',   'C'),
     version  = ('print version info and exit',                     'flag',   'V'),
     urls     = 'URLs to check',
 )
 
-def main(input=None, output=None, quiet=False, verbose=False,
+def main(input=None, output=None, quiet=False,
          no_color=False, version=False, *urls):
     '''Find the ultimate destination for URLs after following redirections.
 
@@ -89,18 +88,18 @@ the terminal as it processes URLs, unless the option -q is given.
                 msg('Reading URLs from {}'.format(input), 'info', colorize)
             with open(input) as f:
                 lines = map(str.rstrip, f.readlines())
-                results = updated_urls(lines, colorize, quiet, verbose)
+                results = updated_urls(lines, colorize, quiet)
         elif os.path.exists(os.path.join(os.getcwd(), file)):
             full_path = os.path.join(os.getcwd(), file)
             if not quiet:
                 msg('Reading URLs from {}'.format(full_path), 'info', colorize)
             with open(full_path) as f:
                 lines = map(str.rstrip, f.readlines())
-                results = updated_urls(lines, colorize, quiet, verbose)
+                results = updated_urls(lines, colorize, quiet)
         else:
             raise ValueError('Cannot find file "{}"'.format(input))
     else:
-        results = updated_urls(urls, colorize, quiet, verbose)
+        results = updated_urls(urls, colorize, quiet)
 
     if not results:
         msg('No results returned.')

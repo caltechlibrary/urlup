@@ -73,7 +73,7 @@ trying and exits with an error.
 # Main functions.
 # .............................................................................
 
-def _url_tuple(url, colorize = True, quiet = False, verbose = False):
+def _url_tuple(url, colorize = True, quiet = False):
     '''Update one URL and return a tuple of (old URL, new URL).'''
     url = url.strip()
     if not url:
@@ -86,16 +86,12 @@ def _url_tuple(url, colorize = True, quiet = False, verbose = False):
         try:
             (old, new, code) = url_data(url)
             if not quiet:
-                if verbose:
-                    desc = code_meaning(code)
-                    details = '[status code {} = {}]'.format(code, desc)
-                    text = textwrap.fill(details, initial_indent = '   ',
-                                         subsequent_indent = '   ')
-                    msg('{} ==> {}\n{}'.format(old, new, text),
-                        severity(code), colorize)
-                else:
-                    msg('{} ==> {} [{}]'.format(old, new, code),
-                        severity(code), colorize)
+                desc = code_meaning(code)
+                details = '[status code {} = {}]'.format(code, desc)
+                text = textwrap.fill(details, initial_indent = '   ',
+                                     subsequent_indent = '   ')
+                msg('{} ==> {}\n{}'.format(old, new, text),
+                    severity(code), colorize)
             return((old, new, code))
         except Exception as err:
             # If we fail, try again, in case it's a network interruption
@@ -111,16 +107,16 @@ def _url_tuple(url, colorize = True, quiet = False, verbose = False):
     return ()
 
 
-def updated_urls(url_or_list, colorize = True, quiet = False, verbose = False):
+def updated_urls(url_or_list, colorize = True, quiet = False):
     '''Update one URL or list of URLs.  If given a single URL, it returns a
     tuple (old URL, new URL); if given a list of URLs, it returns a list of
     tuples of the same form.
     '''
     if (isinstance(url_or_list, list) or isinstance(url_or_list, tuple)
         or isinstance(url_or_list, Iterable)):
-        return [_url_tuple(url, colorize, quiet, verbose) for url in url_or_list]
+        return [_url_tuple(url, colorize, quiet) for url in url_or_list]
     else:
-        return _url_tuple(url_or_list, colorize, quiet, verbose)
+        return _url_tuple(url_or_list, colorize, quiet)
 
 
 def url_data(url):
