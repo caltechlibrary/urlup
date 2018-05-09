@@ -152,7 +152,7 @@ def _url_data(url, headers):
         # Redirection.  Start from the top with new URL.
         new_url = response.getheader('Location')
         if __debug__: log('New url: {}'.format(new_url))
-        final_data = _url_data(new_url)
+        final_data = _url_data(new_url, headers)
         return (url, final_data[1], response.status)
     else:
         return (url, None, response.status)
