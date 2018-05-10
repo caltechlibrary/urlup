@@ -111,15 +111,25 @@ the terminal as it processes URLs, unless the option -q is given.
     if not results:
         msg('No results returned.')
         sys.exit()
-
-    if output:
+    elif output:
         if not quiet:
             msg('Writing CSV file {}'.format(output), 'info', colorize)
         with open(output, 'w', newline='') as out:
             csvwriter = csv.writer(out, delimiter=',')
             csvwriter.writerows(results)
-
-    if not quiet:
+    elif quiet:
+        # Rationale for the sense of the test against the "quiet" argument:
+        # If we were being quiet, no other info will be printed.  Conversely,
+        # if we weren't being quiet, then the following would be redundant.
+        msg('Results:', 'info', colorize)
+        for item in results:
+            if item[3]:
+                msg('Encountered error {} dereferencing {}'.format(item[3], item[0]),
+                    'error', colorize)
+            elif not item[1]:
+                msg('Could not dereference {}'.format(item[0]), 'warn', colorize)
+            else:
+                msg('{} => {}'.format(item[0], item[1]), 'info', colorize)
         msg('Done.', 'info', colorize)
 
 
