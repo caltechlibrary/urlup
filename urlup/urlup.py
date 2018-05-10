@@ -63,7 +63,7 @@ Each time a failure occurs, this module will wait a while and try again.  The
 wait duration increases geometrically by this factor each time.
 '''
 
-_MAX_RETRIES = 5
+_MAX_RETRIES = 3
 '''
 Maximum number of times a network operation is tried before this module stops
 trying and exits with an error.
@@ -109,14 +109,16 @@ def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = Fa
                 else:
                     msg('{} ==> {} [{}]'.format(old, new, code),
                         severity(code), colorize)
-            return (old, new, code, error)
+            return (old, new, code, None)
         except Exception as err:
             # If we fail, try again, in case it's a network interruption
+            if __debug__: log('{}: {}', url, err)
             failures += 1
             error = err
             if not quiet:
                 msg('{} problem: {}'.format(url, err), 'warn', colorize)
                 msg('Retrying in {}s ...'.format(sleep_time), 'warn', colorize)
+            if __debug__: log('retrying in {}s', sleep_time)
             sleep(sleep_time)
             sleep_time *= _SLEEP_FACTOR
             retry = True
