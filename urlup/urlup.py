@@ -75,8 +75,9 @@ trying and exits with an error.
 
 def updated_urls(urls, headers = None, quiet = True, explain = False, colorize = False):
     '''Update one URL or a list of URLs.  If given a single URL, it returns a
-    tuple (old URL, new URL); if given a list of URLs, it returns a list of
-    tuples of the same form.
+    single tuple of the following form:
+       (old URL, new URL, http status code, error)
+    If given a list of URLs, it returns a list of tuples of the same form.
     '''
     if isinstance(urls, (list, tuple, Iterable)) and not isinstance(urls, str):
         return [_url_tuple(url, headers, quiet, explain, colorize) for url in urls]
@@ -91,6 +92,7 @@ def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = Fa
         return ()
     retry = True
     failures = 0
+    error = None
     sleep_time = 2
     while retry and failures < _MAX_RETRIES:
         retry = False
@@ -107,10 +109,11 @@ def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = Fa
                 else:
                     msg('{} ==> {} [{}]'.format(old, new, code),
                         severity(code), colorize)
-            return((old, new, code))
+            return (old, new, code, error)
         except Exception as err:
             # If we fail, try again, in case it's a network interruption
             failures += 1
+            error = err
             if not quiet:
                 msg('{} problem: {}'.format(url, err), 'warn', colorize)
                 msg('Retrying in {}s ...'.format(sleep_time), 'warn', colorize)
@@ -118,7 +121,7 @@ def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = Fa
             sleep_time *= _SLEEP_FACTOR
             retry = True
     if failures >= _MAX_RETRIES:
-        raise SystemExit(color('Exceeded maximum failures. Quitting.'))
+        return (url, None, None, error)
     return ()
 
 
