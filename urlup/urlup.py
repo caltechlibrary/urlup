@@ -27,6 +27,7 @@ import sys
 import textwrap
 from   time import time, sleep
 from   urllib.parse import urlsplit
+import urllib.request
 
 try:
     thisdir = os.path.dirname(os.path.abspath(__file__))
@@ -166,10 +167,17 @@ def _url_data(url, headers):
         return (url, final_data[1], response.status)
     elif response.status in [301, 302, 303, 308]:
         # Redirection.  Start from the top with new URL.
-        new_url = response.getheader('Location')
-        if __debug__: log('New url: {}'.format(new_url))
-        final_data = _url_data(new_url, headers)
-        return (url, final_data[1], response.status)
+        # Note: I previously used the following to get the new location
+        # manually, but then ran into a case where the value returne was
+        # https://ieeexplore.ieee.orghttp://ieeexplore.ieee.org/xpl/conhome.jsp?punumber=1000245
+        # i.e., it was mangled.  This is hard to detect because it still has
+        # the form of a valid URI, and all the usual utilities just say it's
+        # valid, even though it's.
+        # new_url = response.getheader('Location')
+        ref = urllib.request.urlopen(url)
+        new_url = ref.geturl()
+        if __debug__: log('Redirected to {}'.format(new_url))
+        return (url, new_url, response.status)
     else:
         return (url, None, response.status)
 
