@@ -79,7 +79,6 @@ def updated_urls(urls, headers = None, quiet = True, explain = False, colorize =
     tuples of the same form.
     '''
     if isinstance(urls, (list, tuple, Iterable)) and not isinstance(urls, str):
-        import pdb; pdb.set_trace()
         return [_url_tuple(url, headers, quiet, explain, colorize) for url in urls]
     else:
         return _url_tuple(urls, headers, quiet, explain, colorize)
