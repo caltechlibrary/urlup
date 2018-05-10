@@ -78,6 +78,10 @@ the terminal as it processes URLs, unless the option -q is given.
     if not input and not urls:
         raise SystemExit(color('Need a file or URLs as argument. Use -h to get help',
                                'error', colorize))
+    if not input and urls and urls[0].startswith('-'):
+        # It starts with a dash but not recognized by plac and can't be a URL.
+        raise SystemExit(color('Unrecognized argument "{}". (Hint: use -h to get help.)'
+                               .format(urls[0])))
     if not output and not quiet:
         msg("No output file specified; results won't be saved.", 'warn', colorize)
     elif not quiet:
