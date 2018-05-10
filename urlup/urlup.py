@@ -19,7 +19,7 @@ software is made freely available under the terms specified in the LICENSE file
 provided with this software.
 '''
 
-from   collections import Iterable
+from   collections import Iterable, namedtuple
 import http.client
 from   http.client import responses as http_responses
 import os
@@ -70,6 +70,18 @@ trying and exits with an error.
 '''
 
 
+# Global constants.
+# .............................................................................
+
+UrlData = namedtuple('UrlData', 'original final status error')
+UrlData.__doc__ = '''Data about the eventual destination of a given URL.
+  'original' is the starting URL
+  'final' is the URL after dereferencing and following redirections
+  'status' is the HTTP status code obtained on the 'original' URL
+  'error' is the error (if any) encountered while trying to dereference the URL
+'''
+
+
 # Main functions.
 # .............................................................................
 
@@ -109,7 +121,7 @@ def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = Fa
                 else:
                     msg('{} ==> {} [{}]'.format(old, new, code),
                         severity(code), colorize)
-            return (old, new, code, None)
+            return UrlData(old, new, code, None)
         except Exception as err:
             # If we fail, try again, in case it's a network interruption
             if __debug__: log('{}: {}', url, err)
@@ -123,8 +135,8 @@ def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = Fa
             sleep_time *= _SLEEP_FACTOR
             retry = True
     if failures >= _MAX_RETRIES:
-        return (url, None, None, error)
-    return ()
+        return UrlData(url, None, None, error)
+    return UrlData(url, None, None, None)
 
 
 def _url_data(url, headers):

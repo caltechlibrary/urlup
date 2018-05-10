@@ -76,8 +76,8 @@ the terminal as it processes URLs, unless the option -q is given.
         sys.exit()
 
     if not input and not urls:
-        raise SystemExit(color('Need a file or URLs as argument', 'error', colorize))
-
+        raise SystemExit(color('Need a file or URLs as argument. Use -h to get help',
+                               'error', colorize))
     if not output and not quiet:
         msg("No output file specified; results won't be saved.", 'warn', colorize)
     elif not quiet:
@@ -123,13 +123,13 @@ the terminal as it processes URLs, unless the option -q is given.
         # if we weren't being quiet, then the following would be redundant.
         msg('Results:', 'info', colorize)
         for item in results:
-            if item[3]:
-                msg('Encountered error {} dereferencing {}'.format(item[3], item[0]),
-                    'error', colorize)
-            elif not item[1]:
-                msg('Could not dereference {}'.format(item[0]), 'warn', colorize)
+            if item.error:
+                msg('Encountered error {} dereferencing {}'
+                    .format(item.error, item.original), 'error', colorize)
+            elif not item.final:
+                msg('Could not dereference {}'.format(item.original), 'warn', colorize)
             else:
-                msg('{} => {}'.format(item[0], item[1]), 'info', colorize)
+                msg('{} => {}'.format(item.original, item.final), 'info', colorize)
         msg('Done.', 'info', colorize)
 
 
