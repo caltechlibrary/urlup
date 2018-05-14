@@ -1,16 +1,17 @@
 '''
-__main__: main command-line interface to urlup
+__main__: main command-line interface to urlup.
 
 Authors
 -------
 
-Michael Hucka <mhucka@caltech.edu>
+Michael Hucka <mhucka@caltech.edu> -- Caltech Library
 
 Copyright
 ---------
 
 Copyright (c) 2018 by the California Institute of Technology.  This code is
-open-source software.  Please see the file "LICENSE" for more information.
+open-source software released under a 3-clause BSD license.  Please see the
+file "LICENSE" for more information.
 '''
 
 import csv

@@ -6,6 +6,18 @@ which provides codes and short meanings but not enough detail to serve as
 explanations.  It also does not contain all codes that servers may return.
 This http_meanings module offers longer explanations of http
 status codes.
+
+Authors
+-------
+
+Michael Hucka <mhucka@caltech.edu> -- Caltech Library
+
+Copyright
+---------
+
+Copyright (c) 2018 by the California Institute of Technology.  This code is
+open-source software released under a 3-clause BSD license.  Please see the
+file "LICENSE" for more information.
 '''
 
 from http import HTTPStatus
