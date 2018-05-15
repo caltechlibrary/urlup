@@ -50,17 +50,19 @@ If the command-line option -i is not provided, this program assumes that the
 URLs to be checked are supplied on the command line.  If -i is used, the URLs
 should be written one per line in the file.
 
-If the option -o is used, data is written in comma-separated format to the
-given file, with each row containing the following information:
+If the option -o is used, data is written in comma-separated (CSV) format to
+the given file, with each row containing the following columns:
 
-  original url, final url, http code
+  original url, final url, http code, error
 
-The http code is the code returned by the server when the original url is
-accessed.  The final url is the ultimate URL that results after following
-redirections (if any).
+The "http code" is the code returned by the server when the "original url" is
+accessed.  The "final url" is the ultimate URL that results after following
+redirections (if any).  If an input generates an error, the "final url" will
+be empty, and an error message will be given in the "error" colum.
 
 Even if writing the output to a file, this program will print information to
-the terminal as it processes URLs, unless the option -q is given.
+the terminal as it processes URLs, unless the option -q is given to make it
+more quiet.
 '''
 
     # Our defaults are to do things like color the output, which means the
@@ -110,7 +112,7 @@ the terminal as it processes URLs, unless the option -q is given.
         else:
             # Not given a file.  Do the arguments look like URLs?  If so, use them.
             parts = urisplit(urls[0])
-            if not parts.scheme:
+            if not parts.scheme and not parts.path:
                 raise SystemExit(color('{} does not appear to be a proper URL'.format(urls[0]),
                                        'error', colorize))
             results = updated_urls(urls, None, quiet, explain, colorize)
@@ -132,7 +134,7 @@ the terminal as it processes URLs, unless the option -q is given.
         # Rationale for the sense of the test against the "quiet" argument:
         # If we were being quiet, no other info will be printed.  Conversely,
         # if we weren't being quiet, then the following would be redundant.
-        msg('Results:', 'info', colorize)
+        msg('Results:')
         for item in results:
             if item.error:
                 msg('Encountered error {} dereferencing {}'
@@ -140,7 +142,8 @@ the terminal as it processes URLs, unless the option -q is given.
             elif not item.final:
                 msg('Could not dereference {}'.format(item.original), 'warn', colorize)
             else:
-                msg('{} => {}'.format(item.original, item.final), 'info', colorize)
+                msg('{} => {}'.format(color(item.original, 'info', colorize),
+                                      color(item.final, 'info', colorize)))
         msg('Done.')
 
 
