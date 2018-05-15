@@ -88,7 +88,7 @@ more quiet.
     if not output and not quiet:
         msg("No output file specified; results won't be saved.", 'warn', colorize)
     elif not quiet:
-        msg('Output will be written to {}'.format(output))
+        rename_if_existing(output, colorize)
 
     results = []
     try:
@@ -146,6 +146,20 @@ more quiet.
                                       color(item.final, 'info', colorize)))
         msg('Done.')
 
+
+def rename_if_existing(file, colorize):
+    def rename(path):
+        backup = path + '.bak'
+        msg('Renaming existing file {} to {}'.format(path, backup), 'warn', colorize)
+        os.rename(path, backup)
+
+    if os.path.exists(file):
+        rename(file)
+        return
+    path = os.path.join(os.getcwd(), file)
+    if os.path.exists(path):
+        rename(path)
+        return
 
 # The following allows users to invoke this using "python3 -m urlup".
 
