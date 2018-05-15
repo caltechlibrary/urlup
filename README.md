@@ -5,7 +5,7 @@ Urlup is a small utility program and Python 3 package to dereference URLs and de
 
 *Authors*:      [Michael Hucka](http://github.com/mhucka)<br>
 *Repository*:   [https://github.com/caltechlibrary/urlup](https://github.com/caltechlibrary/urlup)<br>
-*License*:      BSD/MIT derivative &ndash; see the [LICENSE](LICENSE) file for more information
+*License*:      BSD 3-clause license &ndash; see the [LICENSE](LICENSE) file for more information
 
 ☀ Introduction
 -----------------------------
@@ -105,9 +105,6 @@ Error: Cannot resolve host name
 ```
 
 
-
-
-
 ⁇ Getting help and support
 --------------------------
 
@@ -117,7 +114,7 @@ If you find an issue, please submit it in [the GitHub issue tracker](https://git
 ☮︎ Copyright and license
 ---------------------
 
-Copyright (C) 2018, Caltech.  This software is freely distributed under a BSD/MIT type license.  Please see the [LICENSE](LICENSE) file for more information.
+Copyright (C) 2018, Caltech.  This software is freely distributed under a BSD 3-clause license.  Please see the [LICENSE](LICENSE) file for more information.
     
 <div align="center">
   <a href="https://www.caltech.edu">
