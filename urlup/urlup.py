@@ -152,27 +152,34 @@ def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = Fa
 
 def _url_data(url, headers):
     if __debug__: log('Looking up {}'.format(url))
+    url_used = url
     parts = urlsplit(url)
     if not parts.netloc:
-        return (url, None, None, "Malformed URL")
+        if not parts.scheme and not parts.path:
+            return (url, None, None, "Malformed URL")
+        elif parts.path and not parts.scheme:
+            # Most likely case is the user typed a host or domain name only
+            url_used = 'http://' + parts.path
+            if __debug__: log('Rewrote {} to {}'.format(url, url_used))
+            parts = urlsplit(url_used)
     conn = http_connection(parts)
     try:
         if headers:
-            conn.request("GET", url, {}, headers)
+            conn.request("GET", url_used, {}, headers)
         else:
-            conn.request("GET", url, {})
+            conn.request("GET", url_used, {})
     except socket.gaierror as err:
         # gai = getaddrinfo()
         if err.errno == 8:
             # "nodename nor servname provided, or not known"
-            return (url, None, None, "Cannot resolve host name")
+            return (url_used, None, None, "Cannot resolve host name")
         else:
-            return (url, None, None, err)
+            return (url_used, None, None, err)
 
     response = conn.getresponse()
     if __debug__: log('Got response code {}'.format(response.status))
     if response.status == 200:
-        return (url, url, response.status, None)
+        return (url, url_used, response.status, None)
     elif response.status == 202:
         # Code 202 = Accepted. "The request has been received but not yet
         # acted upon. It is non-committal, meaning that there is no way in
@@ -181,7 +188,7 @@ def _url_data(url, headers):
         # process or server handles the request, or for batch processing."
         if __debug__: log('Pausing & trying')
         sleep(1)                        # Arbitrary.
-        final_data = _url_data(url)     # Try again.
+        final_data = _url_data(url_used) # Try again.
         # Return the original response code, not the subsequent one.
         return (url, final_data[1], response.status, None)
     elif response.status in [301, 302, 303, 308]:
@@ -194,7 +201,7 @@ def _url_data(url, headers):
         # valid, even though it's obviously not.
         # new_url = response.getheader('Location')
         try:
-            ref = urllib.request.urlopen(url)
+            ref = urllib.request.urlopen(url_used)
         except Exception as err:
             return (url, None, err.status, err)
         new_url = ref.geturl()
