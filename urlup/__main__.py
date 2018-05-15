@@ -86,20 +86,20 @@ the terminal as it processes URLs, unless the option -q is given.
     if not output and not quiet:
         msg("No output file specified; results won't be saved.", 'warn', colorize)
     elif not quiet:
-        msg('Output will be written to {}'.format(output, 'info', colorize))
+        msg('Output will be written to {}'.format(output))
 
     results = []
     if input:
         if os.path.exists(input):
             if not quiet:
-                msg('Reading URLs from {}'.format(input), 'info', colorize)
+                msg('Reading URLs from {}'.format(input))
             with open(input) as f:
                 lines = map(str.rstrip, f.readlines())
                 results = updated_urls(lines, None, quiet, explain, colorize)
         elif os.path.exists(os.path.join(os.getcwd(), file)):
             full_path = os.path.join(os.getcwd(), file)
             if not quiet:
-                msg('Reading URLs from {}'.format(full_path), 'info', colorize)
+                msg('Reading URLs from {}'.format(full_path))
             with open(full_path) as f:
                 lines = map(str.rstrip, f.readlines())
                 results = updated_urls(lines, None, quiet, explain, colorize)
@@ -118,7 +118,7 @@ the terminal as it processes URLs, unless the option -q is given.
         sys.exit()
     elif output:
         if not quiet:
-            msg('Writing CSV file {}'.format(output), 'info', colorize)
+            msg('Writing CSV file {}'.format(output))
         with open(output, 'w', newline='') as out:
             csvwriter = csv.writer(out, delimiter=',')
             csvwriter.writerows(results)
@@ -135,7 +135,7 @@ the terminal as it processes URLs, unless the option -q is given.
                 msg('Could not dereference {}'.format(item.original), 'warn', colorize)
             else:
                 msg('{} => {}'.format(item.original, item.final), 'info', colorize)
-        msg('Done.', 'info', colorize)
+        msg('Done.')
 
 
 # The following allows users to invoke this using "python3 -m urlup".
