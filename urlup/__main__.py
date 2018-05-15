@@ -121,7 +121,9 @@ the terminal as it processes URLs, unless the option -q is given.
             msg('Writing CSV file {}'.format(output))
         with open(output, 'w', newline='') as out:
             csvwriter = csv.writer(out, delimiter=',')
-            csvwriter.writerows(results)
+            for data in results:
+                csvwriter.writerow([data.original, data.final or '',
+                                    data.status, data.error or ''])
     elif quiet:
         # Rationale for the sense of the test against the "quiet" argument:
         # If we were being quiet, no other info will be printed.  Conversely,
