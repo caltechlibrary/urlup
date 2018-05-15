@@ -100,7 +100,7 @@ Original URL: http://caltech.edu
 Final URL: http://www.caltech.edu/
 Status code: 302
 
-Original URL: http://notarealurl.foo
+Original URL: http://notarealurl.nowhere
 Error: Cannot resolve host name
 ```
 
