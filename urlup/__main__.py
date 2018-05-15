@@ -96,8 +96,8 @@ the terminal as it processes URLs, unless the option -q is given.
             with open(input) as f:
                 lines = map(str.rstrip, f.readlines())
                 results = updated_urls(lines, None, quiet, explain, colorize)
-        elif os.path.exists(os.path.join(os.getcwd(), file)):
-            full_path = os.path.join(os.getcwd(), file)
+        elif os.path.exists(os.path.join(os.getcwd(), input)):
+            full_path = os.path.join(os.getcwd(), input)
             if not quiet:
                 msg('Reading URLs from {}'.format(full_path))
             with open(full_path) as f:
