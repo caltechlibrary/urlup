@@ -6,7 +6,7 @@
 # @website https://github.com/caltechlibrary/urlup
 # =============================================================================
 
-__version__     = '0.7.0'
+__version__     = '1.0.0'
 __title__       = 'urlup'
 __description__ = 'URL Update'
 __url__         = 'https://github.com/caltechlibrary/urlup'
