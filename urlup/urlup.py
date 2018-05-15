@@ -23,6 +23,7 @@ from   collections import Iterable, namedtuple
 import http.client
 from   http.client import responses as http_responses
 import os
+import socket
 import sys
 import textwrap
 from   time import time, sleep
@@ -110,19 +111,23 @@ def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = Fa
     while retry and failures < _MAX_RETRIES:
         retry = False
         try:
-            (old, new, code) = _url_data(url, headers)
+            (old, new, code, url_error) = _url_data(url, headers)
             if not quiet:
-                if explain:
+                if url_error:
+                    msg('{} -- {}'.format(url, color(url_error, 'error', colorize)))
+                elif explain:
                     desc = code_meaning(code)
                     details = '[status code {} = {}]'.format(code, desc)
                     text = textwrap.fill(details, initial_indent = '   ',
                                          subsequent_indent = '   ')
-                    msg('{} ==> {}\n{}'.format(old, new, text),
-                        severity(code), colorize)
+                    msg('{} ==> {}\n{}'.format(color(old, severity(code), colorize),
+                                               color(new, severity(code), colorize),
+                                               color(text, 'dark', colorize)))
                 else:
-                    msg('{} ==> {} [{}]'.format(old, new, code),
-                        severity(code), colorize)
-            return UrlData(old, new, code, None)
+                    msg('{} ==> {} {}'.format(color(old, severity(code), colorize),
+                                                color(new, severity(code), colorize),
+                                                color('[' + str(code) + ']', 'dark', colorize)))
+            return UrlData(old, new, code, url_error)
         except Exception as err:
             # If we fail, try again, in case it's a network interruption
             if __debug__: log('{}: {}', url, err)
@@ -136,6 +141,11 @@ def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = Fa
             sleep_time *= _SLEEP_FACTOR
             retry = True
     if failures >= _MAX_RETRIES:
+        if not quiet:
+            if error:
+                msg('{}: {}'.format(url, color(error, 'error', colorize)))
+            else:
+                msg('{}: {}'.format(url, color('Failed', 'error', colorize)))
         return UrlData(url, None, None, error)
     return UrlData(url, None, None, None)
 
@@ -143,18 +153,26 @@ def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = Fa
 def _url_data(url, headers):
     if __debug__: log('Looking up {}'.format(url))
     parts = urlsplit(url)
-    if parts.scheme == 'https':
-        conn = http.client.HTTPSConnection(parts.netloc, timeout=_NETWORK_TIMEOUT)
-    else:
-        conn = http.client.HTTPConnection(parts.netloc, timeout=_NETWORK_TIMEOUT)
-    if headers:
-        conn.request("GET", url, {}, headers)
-    else:
-        conn.request("GET", url, {})
+    if not parts.netloc:
+        return (url, None, None, "Malformed URL")
+    conn = http_connection(parts)
+    try:
+        if headers:
+            conn.request("GET", url, {}, headers)
+        else:
+            conn.request("GET", url, {})
+    except socket.gaierror as err:
+        # gai = getaddrinfo()
+        if err.errno == 8:
+            # "nodename nor servname provided, or not known"
+            return (url, None, None, "Cannot resolve host name")
+        else:
+            return (url, None, None, err)
+
     response = conn.getresponse()
     if __debug__: log('Got response code {}'.format(response.status))
     if response.status == 200:
-        return (url, url, response.status)
+        return (url, url, response.status, None)
     elif response.status == 202:
         # Code 202 = Accepted. "The request has been received but not yet
         # acted upon. It is non-committal, meaning that there is no way in
@@ -163,27 +181,38 @@ def _url_data(url, headers):
         # process or server handles the request, or for batch processing."
         if __debug__: log('Pausing & trying')
         sleep(1)                        # Arbitrary.
-        final_data = _url_data(url)
-        return (url, final_data[1], response.status)
+        final_data = _url_data(url)     # Try again.
+        # Return the original response code, not the subsequent one.
+        return (url, final_data[1], response.status, None)
     elif response.status in [301, 302, 303, 308]:
         # Redirection.  Start from the top with new URL.
         # Note: I previously used the following to get the new location
         # manually, but then ran into a case where the value returne was
         # https://ieeexplore.ieee.orghttp://ieeexplore.ieee.org/xpl/conhome.jsp?punumber=1000245
         # i.e., it was mangled.  This is hard to detect because it still has
-        # the form of a valid URI, and all the usual utilities just say it's
-        # valid, even though it's.
+        # the form of a URI, and all the usual utilities just say it's
+        # valid, even though it's obviously not.
         # new_url = response.getheader('Location')
-        ref = urllib.request.urlopen(url)
+        try:
+            ref = urllib.request.urlopen(url)
+        except Exception as err:
+            return (url, None, err.status, err)
         new_url = ref.geturl()
         if __debug__: log('Redirected to {}'.format(new_url))
-        return (url, new_url, response.status)
+        return (url, new_url, response.status, None)
     else:
-        return (url, None, response.status)
+        return (url, None, response.status, "Unable to resolve URL")
 
 
 # Misc. utilities
 # .............................................................................
+
+def http_connection(parts):
+    if parts.scheme == 'https':
+        return http.client.HTTPSConnection(parts.netloc, timeout=_NETWORK_TIMEOUT)
+    else:
+        return http.client.HTTPConnection(parts.netloc, timeout=_NETWORK_TIMEOUT)
+
 
 def severity(code):
     if code < 300:
