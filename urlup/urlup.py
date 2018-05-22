@@ -54,7 +54,7 @@ if __debug__:
 # Global constants.
 # .............................................................................
 
-_NETWORK_TIMEOUT = 15
+_NETWORK_TIMEOUT = 10
 '''
 How long to wait on a network connection attempt.
 '''
