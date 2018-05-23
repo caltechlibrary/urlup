@@ -7,10 +7,15 @@ Urlup is a small utility program and Python 3 package to dereference URLs and de
 *Repository*:   [https://github.com/caltechlibrary/urlup](https://github.com/caltechlibrary/urlup)<br>
 *License*:      BSD 3-clause license &ndash; see the [LICENSE](LICENSE) file for more information
 
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg?style=flat-square)](https://choosealicense.com/licenses/bsd-3-clause)
+[![Python](https://img.shields.io/badge/Python-3.4+-brightgreen.svg?style=flat-square)](http://shields.io)
+[![Latest release](https://img.shields.io/badge/Latest_release-1.0.0-b44e88.svg?style=flat-square)](http://shields.io)
+
 ☀ Introduction
 -----------------------------
 
 Sometimes we have a list of URLs and we need to find out the ultimate destinations after any redirections have taken place. _urlup_ is a simple program to dereference a list of URLs for that purpose.  It provides diagnostics and HTTP status codes if desired.  It can be used from the command line, and it also provides a Python 3 module that can be called programmatically.
+
 
 ✺ Installation instructions
 ---------------------------
@@ -27,6 +32,7 @@ cd urlup
 sudo pip3 install .
 ```
 Both of these installation approaches should automatically install some Python dependencies that `urlup` relies upon, namely [plac](https://pypi.python.org/pypi/plac), [termcolor](https://pypi.python.org/pypi/termcolor) and [uritools](https://pypi.org/project/uritools/).
+
 
 ▶︎ Basic operation
 ------------------
@@ -109,6 +115,12 @@ Error: Cannot resolve host name
 --------------------------
 
 If you find an issue, please submit it in [the GitHub issue tracker](https://github.com/caltechlibrary/urlup/issues) for this repository.
+
+
+★ Do you like it?
+------------------
+
+If you like this software, don't forget to give this repo a star on GitHub to show your support!
 
 
 ☮︎ Copyright and license
