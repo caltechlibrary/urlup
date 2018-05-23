@@ -19,7 +19,7 @@ from .__version__ import __author__, __email__
 from .__version__ import __license__, __copyright__
 
 # Main modules.
-from .urlup import updated_urls
+from .urlup import updated_urls, UrlData
 
 # Supporting modules.
 from .messages import msg, color
