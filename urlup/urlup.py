@@ -150,7 +150,7 @@ def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = Fa
     return UrlData(url, None, None, None)
 
 
-def _url_data(url, headers):
+def _url_data(url, headers = None):
     if __debug__: log('Looking up {}'.format(url))
     url_used = url
     parts = urlsplit(url)
@@ -164,10 +164,7 @@ def _url_data(url, headers):
             parts = urlsplit(url_used)
     conn = http_connection(parts)
     try:
-        if headers:
-            conn.request("GET", url_used, {}, headers)
-        else:
-            conn.request("GET", url_used, {})
+        conn.request("GET", url_used, headers = (headers or {}))
     except socket.gaierror as err:
         # gai = getaddrinfo()
         if err.errno == 8:
