@@ -1,7 +1,7 @@
 urlup<img width="100px" align="right" src=".graphics/noun_1581155_cc.svg">
 =====
 
-Urlup is a small utility program and Python 3 package to dereference URLs and determine their final destinations after following redirections.  _urlup_ can be pronounced "_urrrl-up_".
+Urlup is a small utility program and Python 3 package to dereference URLs and determine their final destinations after following redirections.  _Urlup_ can be pronounced "_urrrl-up_".
 
 *Authors*:      [Michael Hucka](http://github.com/mhucka)<br>
 *Repository*:   [https://github.com/caltechlibrary/urlup](https://github.com/caltechlibrary/urlup)<br>
@@ -14,15 +14,26 @@ Urlup is a small utility program and Python 3 package to dereference URLs and de
 ☀ Introduction
 -----------------------------
 
-Sometimes we have a list of URLs and we need to find out the ultimate destinations after any redirections have taken place. _urlup_ is a simple program to dereference a list of URLs for that purpose.  It provides diagnostics and HTTP status codes if desired.  It can be used from the command line, and it also provides a Python 3 module that can be called programmatically.
+Sometimes we have a list of URLs and we need to find out the ultimate destinations after any redirections have taken place. _Urlup_ is a simple program to dereference a list of URLs for that purpose.  It provides diagnostics and HTTP status codes if desired.  It can be used from the command line, and it also provides a Python 3 module that can be called programmatically.
 
 
 ✺ Installation instructions
 ---------------------------
 
-The following is probably the simplest and most direct way to install `urlup` on your computer directly from this repository:
+Urlup is available in a variety of forms.  You can chose whatever installation approach suits you.
+
+### _Approach #1: Installation from PyPI_
+
+Urlup is [available from PyPI](https://pypi.org/project/urlup).  If you use `pip` with your Python, you can install Urlup using this command line:
 ```sh
-sudo pip3 install git+https://github.com/caltechlibrary/urlup.git
+sudo python3 -m pip install urlup
+```
+
+### _Approach #2: Installation from this GitHub repository_
+
+The following is a simple and direct way to install `urlup` on your computer from this GitHub repository:
+```sh
+sudo python3 -m pip install git+https://github.com/caltechlibrary/urlup.git
 ```
 
 Alternatively, you can clone this GitHub repository and then run `setup.py`:
@@ -31,13 +42,14 @@ git clone https://github.com/caltechlibrary/urlup.git
 cd urlup
 sudo pip3 install .
 ```
-Both of these installation approaches should automatically install some Python dependencies that `urlup` relies upon, namely [plac](https://pypi.python.org/pypi/plac), [termcolor](https://pypi.python.org/pypi/termcolor) and [uritools](https://pypi.org/project/uritools/).
+
+Both of the last two installation approaches should automatically install some Python dependencies that `urlup` relies upon, namely [plac](https://pypi.python.org/pypi/plac), [termcolor](https://pypi.python.org/pypi/termcolor) and [uritools](https://pypi.org/project/uritools/).
 
 
 ▶︎ Basic operation
 ------------------
 
-_urlup_ provides a command-line utility as well as a library.
+_Urlup_ provides a command-line utility as well as a library.
 
 ### Command-line use
 
