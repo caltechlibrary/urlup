@@ -11,6 +11,7 @@ Urlup is a small utility program and Python 3 package to dereference URLs and de
 [![Python](https://img.shields.io/badge/Python-3.4+-brightgreen.svg?style=flat-square)](http://shields.io)
 [![Latest release](https://img.shields.io/badge/Latest_release-1.1.0-b44e88.svg?style=flat-square)](http://shields.io)
 
+
 ☀ Introduction
 -----------------------------
 
@@ -53,7 +54,7 @@ _Urlup_ provides a command-line utility as well as a library.
 
 ### Command-line use
 
-The command-line utility is called `urlup` and can be used from a terminal shell.  It prints help text when given the `-h` option.  For a simple, quick check of a few URLs, you can simply provide the URLs on the command line:
+The command-line utility is called `urlup` and can be used from a terminal shell.  It prints help text when given the `-h` option (`/h` on Windows).  For a simple, quick check of a few URLs, you can simply provide the URLs on the command line:
 
 ```csh
 # urlup http://sbml.org
@@ -62,7 +63,7 @@ http://sbml.org ==> http://sbml.org/Main_Page [301]
 Done.
 ```
 
-The output produced by `urlup` will consist of a line for each URL given, with the original and final URLs printed along with the HTTP status code received when the original URL is first contacted.  If given the `-e` option, it will also print more details about the meaning of the HTTP status received.  For example:
+The output produced by `urlup` will consist of a line for each URL given, with the original and final URLs printed along with the HTTP status code received when the original URL is first contacted.  If given the `-e` option (`/e` on Windows), it will also print more details about the meaning of the HTTP status received.  For example:
 
 ```csh
 # urlup -e caltech.edu www.caltech.edu
@@ -76,7 +77,7 @@ www.caltech.edu ==> http://www.caltech.edu
    [status code 200 = The request has succeeded.]
 ```
 
-The typical usage for `urlup` is to provide it with a list of URLs in a file (one per line) with the `-i` option, and to tell it to write the results to a CSV file with the `-o` option.
+The typical usage for `urlup` is to provide it with a list of URLs in a file (one per line) with the `-i` option (`/i` on Windows), and to tell it to write the results to a CSV file with the `-o` option (`/o` on Windows).
 
 ```csh
 # urlup  -i original_urls.txt  -o final_urls.csv

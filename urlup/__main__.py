@@ -70,6 +70,9 @@ more quiet.
     # Dealing with negated variables is confusing, so turn them around here.
     colorize = 'termcolor' in sys.modules and not no_color
 
+    # Some user interactions change depending on the current platform.
+    on_windows = sys.platform.startswith('win')
+
     # Process arguments
     if version:
         print('{} version {}'.format(urlup.__title__, urlup.__version__))
@@ -78,13 +81,16 @@ more quiet.
         print('License: {}'.format(urlup.__license__))
         sys.exit()
 
+    if on_windows:
+        get_help = '(Hint: use /h to get help.)'
+    else:
+        get_help = '(Hint: use -h to get help.)'
     if not input and not urls:
-        raise SystemExit(color('Need a file or URLs as argument. Use -h to get help',
+        raise SystemExit(color('Need a file or URLs as argument. ' + get_help,
                                'error', colorize))
-    if not input and urls and urls[0].startswith('-'):
+    if not input and urls and urls[0].startswith(('-', '/') if on_windows else '-'):
         # It starts with a dash but not recognized by plac and can't be a URL.
-        raise SystemExit(color('Unrecognized argument "{}". (Hint: use -h to get help.)'
-                               .format(urls[0])))
+        raise SystemExit(color(('Unrecognized argument "{}". ' + get_help).format(urls[0])))
     if not output and not quiet:
         msg("No output file specified; results won't be saved.", 'warn', colorize)
     elif not quiet:
@@ -147,6 +153,16 @@ more quiet.
         msg('Done.')
 
 
+# If this is windows, we want the command-line args to use slash intead
+# of hyphen.
+
+if sys.platform.startswith('win'):
+    main.prefix_chars = '/'
+
+
+# Miscellaneous utilities.
+# ......................................................................
+
 def rename_if_existing(file, colorize):
     def rename(path):
         backup = path + '.bak'
@@ -161,6 +177,9 @@ def rename_if_existing(file, colorize):
         rename(path)
         return
 
+
+# Main entry point.
+# ......................................................................
 # The following allows users to invoke this using "python3 -m urlup".
 
 if __name__ == '__main__':
