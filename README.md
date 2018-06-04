@@ -1,4 +1,4 @@
-urlup
+urlup<img width="100px" align="right" src=".graphics/noun_1581155_cc.svg">
 =====
 
 Urlup is a small utility program and Python 3 package to dereference URLs and determine their final destinations after following redirections.  _urlup_ can be pronounced "_urrrl-up_".
@@ -9,7 +9,7 @@ Urlup is a small utility program and Python 3 package to dereference URLs and de
 
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg?style=flat-square)](https://choosealicense.com/licenses/bsd-3-clause)
 [![Python](https://img.shields.io/badge/Python-3.4+-brightgreen.svg?style=flat-square)](http://shields.io)
-[![Latest release](https://img.shields.io/badge/Latest_release-1.0.0-b44e88.svg?style=flat-square)](http://shields.io)
+[![Latest release](https://img.shields.io/badge/Latest_release-1.1.0-b44e88.svg?style=flat-square)](http://shields.io)
 
 ☀ Introduction
 -----------------------------
@@ -20,7 +20,7 @@ Sometimes we have a list of URLs and we need to find out the ultimate destinatio
 ✺ Installation instructions
 ---------------------------
 
-The following is probably the simplest and most direct way to install `urlup` on your computer:
+The following is probably the simplest and most direct way to install `urlup` on your computer directly from this repository:
 ```sh
 sudo pip3 install git+https://github.com/caltechlibrary/urlup.git
 ```
@@ -121,6 +121,12 @@ If you find an issue, please submit it in [the GitHub issue tracker](https://git
 ------------------
 
 If you like this software, don't forget to give this repo a star on GitHub to show your support!
+
+
+☺︎ Acknowledgments
+-----------------------
+
+The vector artwork used as a logo for Urlup was created by [Eynav Raphael](https://thenounproject.com/graphicool/) and obtained from [The Noun Project](https://thenounproject.com/term/url/1581155/).  It is licensed under the Creative Commons [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/) license.
 
 
 ☮︎ Copyright and license
