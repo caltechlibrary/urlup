@@ -34,8 +34,8 @@ with open(path.join(here, 'urlup/__version__.py')) as f:
 
 setup(
     name             = version['__title__'].lower(),
-    description      = version['__description__'],
-    long_description = 'urlup: dereference URLs and determine their final destinations after following redirections',
+    description      = 'Dereference HTTP addresses to determine ultimate destinations',
+    long_description = version['__description__'],
     version          = version['__version__'],
     author           = version['__author__'],
     author_email     = version['__email__'],
