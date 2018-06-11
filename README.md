@@ -9,8 +9,8 @@ Urlup is a small utility program and Python 3 package to dereference URLs and de
 
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg?style=flat-square)](https://choosealicense.com/licenses/bsd-3-clause)
 [![Python](https://img.shields.io/badge/Python-3.4+-brightgreen.svg?style=flat-square)](http://shields.io)
-[![Latest release](https://img.shields.io/badge/Latest_release-1.2.0-b44e88.svg?style=flat-square)](http://shields.io)
-[![DOI](http://img.shields.io/badge/DOI-10.22002%20%2F%20D1.954-blue.svg?style=flat-square)](https://data.caltech.edu/records/954)
+[![Latest release](https://img.shields.io/badge/Latest_release-1.2.1-b44e88.svg?style=flat-square)](http://shields.io)
+<!-- [![DOI](http://img.shields.io/badge/DOI-10.22002%20%2F%20D1.956-blue.svg?style=flat-square)](https://data.caltech.edu/records/959) -->
 
 
 ☀ Introduction
