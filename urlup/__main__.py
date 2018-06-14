@@ -101,10 +101,10 @@ more quiet.
     elif not quiet:
         rename_if_existing(output, colorize)
 
+    ulist = []
     results = []
     try:
         if input:
-            urls = []
             file_path = None
             if path.exists(input):
                 file_path = input
@@ -116,15 +116,15 @@ more quiet.
             if not quiet:
                 msg('Reading URLs from {}'.format(file_path))
             with open(file_path) as f:
-                urls = map(str.rstrip, f.readlines())
+                ulist = map(str.rstrip, f.readlines())
         else:
-            # Not given a file.  Do the arguments look like URLs?  If so, use them.
-            urls = url[0]
-            parts = urisplit(urls)
+            # Not given a file.  Do the arguments look like URLs?
+            parts = urisplit(url[0])
             if not parts.scheme and not parts.path:
-                raise SystemExit(color('{} does not appear to be a URL'.format(urls),
+                raise SystemExit(color('{} does not appear to be a URL'.format(url[0]),
                                        'error', colorize))
-        results = updated_urls(urls, quiet, explain, colorize)
+            ulist = url
+        results = updated_urls(ulist, quiet, explain, colorize)
     except KeyboardInterrupt:
         msg('Quitting.')
 
@@ -136,6 +136,8 @@ more quiet.
             msg('Writing CSV file {}'.format(output))
         with open(output, 'w', newline='') as out:
             csvwriter = csv.writer(out, delimiter=',')
+            if not isinstance(results, list):
+                results = [results]
             for data in results:
                 csvwriter.writerow([data.original, data.final or '',
                                     data.status, data.error or ''])
@@ -144,6 +146,8 @@ more quiet.
         # If we were being quiet, no other info will be printed.  Conversely,
         # if we weren't being quiet, then the following would be redundant.
         msg('Results:')
+        if not isinstance(results, list):
+            results = [results]
         for item in results:
             if item.error:
                 msg('Encountered error {} dereferencing {}'
