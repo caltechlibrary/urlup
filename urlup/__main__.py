@@ -104,14 +104,14 @@ more quiet.
                     msg('Reading URLs from {}'.format(input))
                 with open(input) as f:
                     lines = map(str.rstrip, f.readlines())
-                    results = updated_urls(lines, None, quiet, explain, colorize)
+                    results = updated_urls(lines, quiet, explain, colorize)
             elif os.path.exists(os.path.join(os.getcwd(), input)):
                 full_path = os.path.join(os.getcwd(), input)
                 if not quiet:
                     msg('Reading URLs from {}'.format(full_path))
                 with open(full_path) as f:
                     lines = map(str.rstrip, f.readlines())
-                    results = updated_urls(lines, None, quiet, explain, colorize)
+                    results = updated_urls(lines, quiet, explain, colorize)
             else:
                 raise SystemExit(color('Cannot find file "{}"'.format(input),
                                        'error', colorize))
@@ -121,7 +121,7 @@ more quiet.
             if not parts.scheme and not parts.path:
                 raise SystemExit(color('{} does not appear to be a proper URL'.format(urls[0]),
                                        'error', colorize))
-            results = updated_urls(urls, None, quiet, explain, colorize)
+            results = updated_urls(urls, quiet, explain, colorize)
     except KeyboardInterrupt:
         msg('Quitting.')
 
