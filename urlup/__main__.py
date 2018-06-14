@@ -16,6 +16,7 @@ file "LICENSE" for more information.
 
 import csv
 import os
+import os.path as path
 import plac
 import sys
 try:
@@ -33,17 +34,17 @@ from urlup.messages import color, msg
 # ......................................................................
 
 @plac.annotations(
-    explain  = ('print explanations of HTTP codes',                'flag',   'e'),
-    input    = ('input file to read',                              'option', 'i'),
-    output   = ('output file to write',                            'option', 'o'),
+    explain  = ('print explanations of HTTP codes encountered',    'flag',   'e'),
+    input    = ('read URLs from file F',                           'option', 'i'),
+    output   = ('write results to file R',                         'option', 'o'),
     quiet    = ('do not print messages while working',             'flag',   'q'),
     no_color = ('do not color-code terminal output (default: do)', 'flag',   'C'),
     version  = ('print version info and exit',                     'flag',   'V'),
-    urls     = 'URLs to check',
+    url      = 'URL to dereference (can supply more than one)',
 )
 
-def main(input=None, output=None, explain = False, quiet=False, no_color=False,
-         version=False, *urls):
+def main(explain = False, input="F", output="R", quiet=False, no_color=False,
+         version=False, *url):
     '''Find the ultimate destination for URLs after following redirections.
 
 If the command-line option -i is not provided, this program assumes that the
@@ -85,12 +86,16 @@ more quiet.
         get_help = '(Hint: use /h to get help.)'
     else:
         get_help = '(Hint: use -h to get help.)'
-    if not input and not urls:
+    if input == 'F' and not path.exists('F'):
+        input = None
+    if output == 'R':
+        output = None
+    if not input and not url:
         raise SystemExit(color('Need a file or URLs as argument. ' + get_help,
                                'error', colorize))
-    if not input and urls and urls[0].startswith(('-', '/') if on_windows else '-'):
+    if not input and url and url[0].startswith(('-', '/') if on_windows else '-'):
         # It starts with a dash but not recognized by plac and can't be a URL.
-        raise SystemExit(color(('Unrecognized argument "{}". ' + get_help).format(urls[0])))
+        raise SystemExit(color(('Unrecognized argument "{}". ' + get_help).format(url[0])))
     if not output and not quiet:
         msg("No output file specified; results won't be saved.", 'warn', colorize)
     elif not quiet:
@@ -99,29 +104,27 @@ more quiet.
     results = []
     try:
         if input:
-            if os.path.exists(input):
-                if not quiet:
-                    msg('Reading URLs from {}'.format(input))
-                with open(input) as f:
-                    lines = map(str.rstrip, f.readlines())
-                    results = updated_urls(lines, quiet, explain, colorize)
-            elif os.path.exists(os.path.join(os.getcwd(), input)):
-                full_path = os.path.join(os.getcwd(), input)
-                if not quiet:
-                    msg('Reading URLs from {}'.format(full_path))
-                with open(full_path) as f:
-                    lines = map(str.rstrip, f.readlines())
-                    results = updated_urls(lines, quiet, explain, colorize)
+            urls = []
+            file_path = None
+            if path.exists(input):
+                file_path = input
+            elif path.exists(path.join(os.getcwd(), input)):
+                file_path = path.join(os.getcwd(), input)
             else:
                 raise SystemExit(color('Cannot find file "{}"'.format(input),
                                        'error', colorize))
+            if not quiet:
+                msg('Reading URLs from {}'.format(file_path))
+            with open(file_path) as f:
+                urls = map(str.rstrip, f.readlines())
         else:
             # Not given a file.  Do the arguments look like URLs?  If so, use them.
-            parts = urisplit(urls[0])
+            urls = url[0]
+            parts = urisplit(urls)
             if not parts.scheme and not parts.path:
-                raise SystemExit(color('{} does not appear to be a proper URL'.format(urls[0]),
+                raise SystemExit(color('{} does not appear to be a URL'.format(urls),
                                        'error', colorize))
-            results = updated_urls(urls, quiet, explain, colorize)
+        results = updated_urls(urls, quiet, explain, colorize)
     except KeyboardInterrupt:
         msg('Quitting.')
 
@@ -164,17 +167,17 @@ if sys.platform.startswith('win'):
 # ......................................................................
 
 def rename_if_existing(file, colorize):
-    def rename(path):
-        backup = path + '.bak'
-        msg('Renaming existing file {} to {}'.format(path, backup), 'warn', colorize)
-        os.rename(path, backup)
+    def rename(f):
+        backup = f + '.bak'
+        msg('Renaming existing file {} to {}'.format(f, backup), 'warn', colorize)
+        os.rename(f, backup)
 
-    if os.path.exists(file):
+    if path.exists(file):
         rename(file)
         return
-    path = os.path.join(os.getcwd(), file)
-    if os.path.exists(path):
-        rename(path)
+    full_path = path.join(os.getcwd(), file)
+    if path.exists(full_path):
+        rename(full_path)
         return
 
 
