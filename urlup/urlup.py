@@ -87,19 +87,19 @@ UrlData.__doc__ = '''Data about the eventual destination of a given URL.
 # Main functions.
 # .............................................................................
 
-def updated_urls(urls, headers = None, quiet = True, explain = False, colorize = False):
+def updated_urls(urls, quiet = True, explain = False, colorize = False):
     '''Update one URL or a list of URLs.  If given a single URL, it returns a
     single tuple of the following form:
        (old URL, new URL, http status code, error)
     If given a list of URLs, it returns a list of tuples of the same form.
     '''
     if isinstance(urls, (list, tuple, Iterable)) and not isinstance(urls, str):
-        return [_url_tuple(url, headers, quiet, explain, colorize) for url in urls]
+        return [_url_tuple(url, quiet, explain, colorize) for url in urls]
     else:
-        return _url_tuple(urls, headers, quiet, explain, colorize)
+        return _url_tuple(urls, quiet, explain, colorize)
 
 
-def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = False):
+def _url_tuple(url, quiet = True, explain = False, colorize = False):
     '''Update one URL and return a tuple of (old URL, new URL).'''
     url = url.strip()
     if not url:
@@ -111,7 +111,7 @@ def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = Fa
     while retry and failures < _MAX_RETRIES:
         retry = False
         try:
-            (old, new, code, url_error) = _url_data(url, headers)
+            (old, new, code, url_error) = _url_data(url)
             if not quiet:
                 if url_error:
                     msg('{} -- {}'.format(url, color(url_error, 'error', colorize)))
@@ -150,7 +150,7 @@ def _url_tuple(url, headers = None, quiet = True, explain = False, colorize = Fa
     return UrlData(url, None, None, None)
 
 
-def _url_data(url, headers = None):
+def _url_data(url):
     if __debug__: log('Looking up {}'.format(url))
     url_used = url
     parts = urlsplit(url)
@@ -164,7 +164,7 @@ def _url_data(url, headers = None):
             parts = urlsplit(url_used)
     conn = http_connection(parts)
     try:
-        conn.request("GET", url_used, headers = (headers or {}))
+        conn.request("GET", url_used)
     except socket.gaierror as err:
         # gai = getaddrinfo()
         if err.errno == 8:
