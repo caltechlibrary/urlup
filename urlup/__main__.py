@@ -34,42 +34,65 @@ from urlup.messages import color, msg
 # ......................................................................
 
 @plac.annotations(
-    explain  = ('print explanations of HTTP codes encountered',    'flag',   'e'),
-    input    = ('read URLs from file F',                           'option', 'i'),
-    output   = ('write results to file R',                         'option', 'o'),
-    quiet    = ('do not print messages while working',             'flag',   'q'),
-    no_color = ('do not color-code terminal output (default: do)', 'flag',   'C'),
-    version  = ('print version info and exit',                     'flag',   'V'),
-    url      = 'URL to dereference (can supply more than one)',
+    explain    = ('print explanations of HTTP codes encountered',    'flag',   'e'),
+    input      = ('read URLs from file F',                           'option', 'i'),
+    output     = ('write results to file R',                         'option', 'o'),
+    pswd       = ('proxy user password',                             'option', 'p'),
+    user       = ('proxy user name',                                 'option', 'u'),
+    quiet      = ('do not print messages while working',             'flag',   'q'),
+    no_color   = ('do not color-code terminal output (default: do)', 'flag',   'C'),
+    version    = ('print version info and exit',                     'flag',   'V'),
+    no_keyring = ('do not use a keyring',                            'flag',   'X'),
+    url        = 'URL to dereference (can supply more than one)',
 )
 
-def main(explain = False, input="F", output="R", quiet=False, no_color=False,
-         version=False, *url):
+def main(explain = False, input="F", output="R", user = None, pswd = None,
+         quiet=False, no_color=False, no_keyring=False, version=False, *url):
     '''Find the ultimate destination for URLs after following redirections.
 
-If the command-line option -i is not provided, this program assumes that the
-URLs to be checked are supplied on the command line.  If -i is used, the URLs
-should be written one per line in the file.
+If the command-line option -i (or /i on Windows) is not provided, this
+program assumes that the URLs to be checked are supplied on the command line.
+If the option -i is used, the URLs should be written one per line in a file
+whose name is provided as the value following the -i option.
 
-If the option -o is used, data is written in comma-separated (CSV) format to
-the given file, with each row containing the following columns:
+If the option -o (or /o on Windows) is used, data is written in a
+comma-separated (CSV) format to the file named after the -o option.  Each
+row of the CSV file will contain the following columns:
 
-  original url, final url, http code, error
+   original url, final url, http code, error
 
-The "http code" is the code returned by the server when the "original url" is
-accessed.  The "final url" is the ultimate URL that results after following
-redirections (if any).  If an input generates an error, the "final url" will
-be empty, and an error message will be given in the "error" colum.
+The "http code" column is the code returned by the server when the "original
+url" is accessed.  The "final url" is the ultimate URL that results after
+following redirections (if any).  If an input generates an error, the "final
+url" will be empty, and an error message will be given in the "error" colum.
 
-Even if writing the output to a file, this program will print information to
-the terminal as it processes URLs, unless the option -q is given to make it
-more quiet.
+If the URLs to be dereference involve a proxy server (such as EZProxy, a
+common type of proxy used by academic institutions), it will be necessary to
+supply login credentials for the proxy component.  By default, Urlup uses the
+operating system's keyring/keychain functionality to get a user name and
+password.  If the information does not exist from a previous run of Urlup, it
+will query the user interactively for the user name and password, and (unless
+the -X or /X argument is given) store them in the user's keyring/keychain so
+that it does not have to ask again in the future.  It is also possible to
+supply the information directly on the command line using the -u and -p
+options (or /u and /p on Windows), but this is discouraged because it is
+insecure on multiuser computer systems.
+
+Currently, the use of only a single EZProxy proxy is supported.
+
+If you ever need to change the information in the keyring/keychain, you can
+run this program again with the -X option, and it will ask you for the values
+and store them in the keyring again.
+
+This program will print information to the terminal as it processes URLs,
+unless the option -q (or /q on Windows) is given to make it more quiet.
 '''
 
     # Our defaults are to do things like color the output, which means the
     # command line flags make more sense as negated values (e.g., "nocolor").
     # Dealing with negated variables is confusing, so turn them around here.
     colorize = 'termcolor' in sys.modules and not no_color
+    use_keyring = not no_keyring
 
     # Some user interactions change depending on the current platform.
     on_windows = sys.platform.startswith('win')
@@ -124,7 +147,7 @@ more quiet.
                 raise SystemExit(color('{} does not appear to be a URL'.format(url[0]),
                                        'error', colorize))
             ulist = url
-        results = updated_urls(ulist, quiet, explain, colorize)
+        results = updated_urls(ulist, user, pswd, use_keyring, quiet, explain, colorize)
     except KeyboardInterrupt:
         msg('Quitting.')
 
