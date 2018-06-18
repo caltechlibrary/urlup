@@ -26,7 +26,6 @@ from   itertools import tee
 import os
 import requests
 import socket
-import ssl
 import sys
 import textwrap
 from   time import time, sleep
@@ -44,6 +43,7 @@ from urlup.messages import color, msg
 from urlup.http_code import code_meaning
 from urlup.credentials import get_credentials, save_credentials, obtain_credentials
 from urlup.errors import ProxyException
+from urlup.proxy_helper import ProxyHelper
 
 # NOTE: to turn on debugging, make sure python -O was *not* used to start
 # python, then set the logging level to DEBUG *before* loading this module.
@@ -76,11 +76,6 @@ Maximum number of times a network operation is tried before this module stops
 trying and exits with an error.
 '''
 
-_KEYRING = "org.caltechlibrary.urlup"
-'''
-The name of the keyring used to store credentials for a proxy, if any.
-'''
-
 
 # Data type definitions.
 # .............................................................................
@@ -97,34 +92,21 @@ UrlData.__doc__ = '''Data about the eventual destination of a given URL.
 # Main functions.
 # .............................................................................
 
-def updated_urls(urls, proxy_user = None, proxy_pswd = None, use_keyring = False,
+def updated_urls(urls, proxy_user = None, proxy_pswd = None, use_keyring = True,
                  quiet = True, explain = False, colorize = False):
     '''Update one URL or a list of URLs.  If given a single URL, it returns a
     single tuple of the following form:
        (old URL, new URL, http status code, error)
     If given a list of URLs, it returns a list of tuples of the same form.
     '''
-    # Do any of the URLs look like they use a proxy?
-    proxy_host = None
-    cookies = None
-    urls, urls_copy = tee(urls)         # Avoid consuming the iterable
-    proxies = [proxy_from_url(u) for u in urls_copy if 'proxy' in u.lower()]
-    if proxies:
-        if len(set(proxies)) > 1:
-            # We're not set up to handle more than one proxy.
-            raise ProxyException('Use of multiple proxies detected but unsupported')
-        proxy_host = proxies[0]
-        auth = proxy_auth(proxy_host, proxy_user, proxy_pswd, use_keyring)
-        cookies = auth.cookies
+    proxy_helper = ProxyHelper(proxy_user, proxy_pswd, use_keyring)
     if isinstance(urls, (list, tuple, Iterable)) and not isinstance(urls, str):
-        return [_url_tuple(url, proxy_host, cookies, quiet, explain, colorize)
-                for url in urls]
+        return [_url_data(url, proxy_helper, quiet, explain, colorize) for url in urls]
     else:
-        return _url_tuple(urls, proxy_host, cookies, quiet, explain, colorize)
+        return _url_data(urls, proxy_helper, quiet, explain, colorize)
 
 
-def _url_tuple(url, proxy_host = None, cookies = None,
-               quiet = True, explain = False, colorize = False):
+def _url_data(url, proxy_helper, quiet = True, explain = False, colorize = False):
     '''Update one URL and return a tuple of (old URL, new URL).'''
     url = url.strip()
     if not url:
@@ -136,7 +118,7 @@ def _url_tuple(url, proxy_host = None, cookies = None,
     while retry and failures < _MAX_RETRIES:
         retry = False
         try:
-            (old, new, code, url_error) = _url_data(url, proxy_host, cookies)
+            (old, new, code, url_error) = _followed_url(url, proxy_helper)
             if not quiet:
                 if url_error:
                     msg('{} -- {}'.format(url, color(url_error, 'error', colorize)))
@@ -175,7 +157,7 @@ def _url_tuple(url, proxy_host = None, cookies = None,
     return UrlData(url, None, None, None)
 
 
-def _url_data(url, proxy_host, cookies):
+def _followed_url(url, proxy_helper):
     if __debug__: log('Looking up {}'.format(url))
     starting_url = url
     parts, valid = url_parts(url)
@@ -184,11 +166,15 @@ def _url_data(url, proxy_host, cookies):
 
     # Connect to the host.
     try:
-        if proxy_host:
-            conn = requests.post(proxied_url(starting_url), cookies = cookies)
+        if proxy_helper.url_contains_proxy(starting_url):
+            if __debug__: log('URL uses a proxy: {}'.format(starting_url))
+            real_url = proxy_helper.proxied_url(starting_url)
+            cookies = proxy_helper.cookies(starting_url)
+            conn = requests.post(real_url, cookies = cookies)
             code = conn.status_code
             ending_url = conn.url
         else:
+            if __debug__: log('URL has no proxy -- going straight to it')
             conn = http_connection(parts)
             conn.request("GET", starting_url)
             code = conn.getresponse().status
@@ -209,14 +195,14 @@ def _url_data(url, proxy_host, cookies):
         raise
 
     # Interpret the response.
-    if __debug__: log('Got response code {}'.format(code))
+    if __debug__: log('Got response code {} for {}'.format(code, starting_url))
     if code == 200:
         return (url, ending_url, code, None)
     elif code == 202:
         # Code 202 = Accepted, "received but not yet acted upon."
         if __debug__: log('Pausing & trying')
         sleep(1)                        # Arbitrary.
-        final_data = _url_data(starting_url, proxy_host, cookies) # Try again.
+        final_data = _followed_url(starting_url, proxy_helper) # Try again.
         # Return the original response code, not the subsequent one.
         return (url, final_data[1], code, None)
     elif code in [301, 302, 303, 308]:
@@ -238,48 +224,6 @@ def _url_data(url, proxy_host, cookies):
         return (url, new_url, code, None)
     else:
         return (url, None, code, "Unable to resolve URL")
-
-
-# Proxy-handling utilities
-# .............................................................................
-
-def proxy_from_url(url):
-    # We expect to see a URL of the form
-    #   https://clsproxy.library.caltech.edu/....stuff....
-    # We return the first address.
-    # Note: 8 is the length of 'https://', which will will work even if we get http
-    next_slash = url.find('/', 8)
-    return url[:next_slash]
-
-
-def proxy_auth(proxy_host, user, pswd, keyring):
-    # Get credentials and connect to the proxy, and construct an object we
-    # use for subsequent network requests.
-    if not user or not pswd:
-        (user, pswd, _, _) = obtain_credentials(_KEYRING, "Proxy login", user, pswd)
-    if keyring:
-        # Save the credentials if they're different from what's currently saved.
-        (s_user, s_pswd, _, _) = get_credentials(_KEYRING)
-        if s_user != user or s_pswd != pswd:
-            save_credentials(_KEYRING, user, pswd)
-    # FIXME the rest of this is too specific to EZProxy
-    credentials = {
-        'user': user,
-        'pass': pswd,
-    }
-    login_url = proxy_host + '/login'
-    auth = requests.post(login_url, data = credentials, allow_redirects = False)
-    if __debug__: log('Proxy requests response code {}'.format(auth.status_code))
-    if 200 <= auth.status_code <= 400:
-        return auth
-    else:
-        import pdb; pdb.set_trace()
-
-
-def proxied_url(url):
-    # FIXME this is too specific to ezproxy
-    start = url.find('url=')
-    return url[start + 4:]
 
 
 # Misc. utilities
