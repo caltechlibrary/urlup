@@ -46,7 +46,7 @@ from urlup.messages import color, msg
     url        = 'URL to dereference (can supply more than one)',
 )
 
-def main(explain = False, input="F", output="R", user = None, pswd = None,
+def main(explain = False, input='F', output='R', user = 'U', pswd = 'P',
          quiet=False, no_color=False, no_keyring=False, version=False, *url):
     '''Find the ultimate destination for URLs after following redirections.
 
@@ -69,6 +69,7 @@ url" will be empty, and an error message will be given in the "error" colum.
 If the URLs to be dereference involve a proxy server (such as EZProxy, a
 common type of proxy used by academic institutions), it will be necessary to
 supply login credentials for the proxy component.  By default, Urlup uses the
+
 operating system's keyring/keychain functionality to get a user name and
 password.  If the information does not exist from a previous run of Urlup, it
 will query the user interactively for the user name and password, and (unless
@@ -113,6 +114,10 @@ unless the option -q (or /q on Windows) is given to make it more quiet.
         input = None
     if output == 'R':
         output = None
+    if user == 'U':
+        user = None
+    if pswd == 'P':
+        pswd = None
     if not input and not url:
         raise SystemExit(color('Need a file or URLs as argument. ' + get_help,
                                'error', colorize))
