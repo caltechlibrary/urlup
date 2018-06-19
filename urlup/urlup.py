@@ -188,7 +188,7 @@ def _followed_url(url, proxy_helper):
         else:
             return (starting_url, None, None, str(err))
     except http.client.InvalidURL as err:
-        # Docs for HTTPResponse say this is raised if port part is bad.
+        # Docs for HTTPResponse say this is raised if port info is bad.
         return (starting_url, None, None, "Bad port")
     except Exception as err:
         if __debug__: log('Error accessing {}: {}'.format(starting_url, str(err)))
@@ -196,11 +196,11 @@ def _followed_url(url, proxy_helper):
 
     # Interpret the response.
     if __debug__: log('Got response code {} for {}'.format(code, starting_url))
-    if code == 200:
+    if code in [200, 204, 206]:
         return (url, ending_url, code, None)
     elif code == 202:
         # Code 202 = Accepted, "received but not yet acted upon."
-        if __debug__: log('Pausing & trying')
+        if __debug__: log('Pausing & retrying')
         sleep(1)                        # Arbitrary.
         final_data = _followed_url(starting_url, proxy_helper) # Try again.
         # Return the original response code, not the subsequent one.
