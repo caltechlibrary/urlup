@@ -152,40 +152,41 @@ unless the option -q (or /q on Windows) is given to make it more quiet.
                                        'error', colorize))
             ulist = url
         results = updated_urls(ulist, user, pswd, use_keyring, quiet, explain, colorize)
-    except KeyboardInterrupt:
-        msg('Quitting.')
 
-    if not results:
-        msg('No results returned.')
-        sys.exit()
-    elif output:
-        if not quiet:
-            msg('Writing CSV file {}'.format(output))
-        with open(output, 'w', newline='') as out:
-            csvwriter = csv.writer(out, delimiter=',')
+        if not results:
+            msg('No results returned.')
+            sys.exit()
+        elif output:
+            if not quiet:
+                msg('Writing CSV file {}'.format(output))
+            with open(output, 'w', newline='') as out:
+                csvwriter = csv.writer(out, delimiter=',')
+                if not isinstance(results, list):
+                    results = [results]
+                for data in results:
+                    if data:
+                        csvwriter.writerow([data.original, data.final or '',
+                                            data.status, data.error or ''])
+        elif quiet:
+            # Rationale for the sense of the test against the "quiet" argument:
+            # If we were being quiet, no other info will be printed.  Conversely,
+            # if we weren't being quiet, then the following would be redundant.
+            msg('Results:')
             if not isinstance(results, list):
                 results = [results]
-            for data in results:
-                if data:
-                    csvwriter.writerow([data.original, data.final or '',
-                                        data.status, data.error or ''])
-    elif quiet:
-        # Rationale for the sense of the test against the "quiet" argument:
-        # If we were being quiet, no other info will be printed.  Conversely,
-        # if we weren't being quiet, then the following would be redundant.
-        msg('Results:')
-        if not isinstance(results, list):
-            results = [results]
-        for item in results:
-            if item.error:
-                msg('Encountered error {} dereferencing {}'
-                    .format(item.error, item.original), 'error', colorize)
-            elif not item.final:
-                msg('Could not dereference {}'.format(item.original), 'warn', colorize)
-            else:
-                msg('{} => {}'.format(color(item.original, 'info', colorize),
-                                      color(item.final, 'info', colorize)))
-        msg('Done.')
+            for item in results:
+                if item.error:
+                    msg('Encountered error {} dereferencing {}'
+                        .format(item.error, item.original), 'error', colorize)
+                elif not item.final:
+                    msg('Could not dereference {}'.format(item.original),
+                        'warn', colorize)
+                else:
+                    msg('{} => {}'.format(color(item.original, 'info', colorize),
+                                          color(item.final, 'info', colorize)))
+            msg('Done.')
+    except KeyboardInterrupt:
+        msg('Quitting.')
 
 
 # If this is windows, we want the command-line args to use slash intead
