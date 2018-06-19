@@ -66,10 +66,9 @@ url" is accessed.  The "final url" is the ultimate URL that results after
 following redirections (if any).  If an input generates an error, the "final
 url" will be empty, and an error message will be given in the "error" colum.
 
-If the URLs to be dereference involve a proxy server (such as EZProxy, a
+If the URLs to be dereference involve a proxy server (such as EZproxy, a
 common type of proxy used by academic institutions), it will be necessary to
 supply login credentials for the proxy component.  By default, Urlup uses the
-
 operating system's keyring/keychain functionality to get a user name and
 password.  If the information does not exist from a previous run of Urlup, it
 will query the user interactively for the user name and password, and (unless
@@ -167,8 +166,9 @@ unless the option -q (or /q on Windows) is given to make it more quiet.
             if not isinstance(results, list):
                 results = [results]
             for data in results:
-                csvwriter.writerow([data.original, data.final or '',
-                                    data.status, data.error or ''])
+                if data:
+                    csvwriter.writerow([data.original, data.final or '',
+                                        data.status, data.error or ''])
     elif quiet:
         # Rationale for the sense of the test against the "quiet" argument:
         # If we were being quiet, no other info will be printed.  Conversely,
