@@ -42,7 +42,7 @@ import urlup
 from urlup.messages import color, msg
 from urlup.http_code import code_meaning
 from urlup.credentials import get_credentials, save_credentials, obtain_credentials
-from urlup.errors import ProxyException
+from urlup.errors import NetworkError, ProxyLoginError, ProxyException
 from urlup.proxy_helper import ProxyHelper
 
 # NOTE: to turn on debugging, make sure python -O was *not* used to start
@@ -92,21 +92,23 @@ UrlData.__doc__ = '''Data about the eventual destination of a given URL.
 # Main functions.
 # .............................................................................
 
-def updated_urls(urls, proxy_user = None, proxy_pswd = None, use_keyring = True,
+def updated_urls(urls, cookies = {}, headers = {},
+                 proxy_user = None, proxy_pswd = None, use_keyring = True,
                  quiet = True, explain = False, colorize = False):
     '''Update one URL or a list of URLs.  If given a single URL, it returns a
     single tuple of the following form:
        (old URL, new URL, http status code, error)
     If given a list of URLs, it returns a list of tuples of the same form.
     '''
-    proxy_helper = ProxyHelper(proxy_user, proxy_pswd, use_keyring)
+    helper = ProxyHelper(proxy_user, proxy_pswd, use_keyring)
     if isinstance(urls, (list, tuple, Iterable)) and not isinstance(urls, str):
-        return [_url_data(url, proxy_helper, quiet, explain, colorize) for url in urls]
+        return [_url_data(url, cookies, headers, helper, quiet, explain, colorize)
+                for url in urls]
     else:
-        return _url_data(urls, proxy_helper, quiet, explain, colorize)
+        return _url_data(urls, cookies, headers, helper, quiet, explain, colorize)
 
 
-def _url_data(url, proxy_helper, quiet = True, explain = False, colorize = False):
+def _url_data(url, cookies, headers, proxy_helper, quiet, explain, colorize):
     '''Update one URL and return a tuple of (old URL, new URL).'''
     url = url.strip()
     if not url:
@@ -118,10 +120,10 @@ def _url_data(url, proxy_helper, quiet = True, explain = False, colorize = False
     while retry and failures < _MAX_RETRIES:
         retry = False
         try:
-            (old, new, code, url_error) = _followed_url(url, proxy_helper)
+            (old, new, code, error) = _analysis(url, cookies, headers, proxy_helper)
             if not quiet:
-                if url_error:
-                    msg('{} -- {}'.format(url, color(url_error, 'error', colorize)))
+                if error:
+                    msg('{} -- {}'.format(url, color(error, 'error', colorize)))
                 elif explain:
                     desc = code_meaning(code)
                     details = '[status code {} = {}]'.format(code, desc)
@@ -132,9 +134,9 @@ def _url_data(url, proxy_helper, quiet = True, explain = False, colorize = False
                                                color(text, 'dark', colorize)))
                 else:
                     msg('{} ==> {} {}'.format(color(old, severity(code), colorize),
-                                                color(new, severity(code), colorize),
-                                                color('[' + str(code) + ']', 'dark', colorize)))
-            return UrlData(old, new, code, url_error)
+                                              color(new, severity(code), colorize),
+                                              color('[' + str(code) + ']', 'dark', colorize)))
+            return UrlData(old, new, code, error)
         except Exception as err:
             # If we fail, try again, in case it's a network interruption
             if __debug__: log('{}: {}', url, err)
@@ -157,7 +159,7 @@ def _url_data(url, proxy_helper, quiet = True, explain = False, colorize = False
     return UrlData(url, None, None, None)
 
 
-def _followed_url(url, proxy_helper):
+def _analysis(url, cookies, headers, proxy_helper):
     if __debug__: log('Looking up {}'.format(url))
     starting_url = url
     parts, valid = url_parts(url)
@@ -165,63 +167,54 @@ def _followed_url(url, proxy_helper):
         return (url, None, None, "Malformed URL")
 
     # Connect to the host.
+    cookie_jar = None
     try:
         if proxy_helper.url_contains_proxy(starting_url):
             if __debug__: log('URL uses a proxy: {}'.format(starting_url))
             real_url = proxy_helper.proxied_url(starting_url)
-            cookies = proxy_helper.cookies(starting_url)
-            conn = requests.post(real_url, cookies = cookies)
+            cookie_jar = proxy_helper.cookies(starting_url)
+            requests.utils.add_dict_to_cookiejar(cookie_jar, cookies)
+            conn = requests.post(real_url, cookies = cookie_jar, headers = headers)
             code = conn.status_code
             ending_url = conn.url
         else:
             if __debug__: log('URL has no proxy -- going straight to it')
-            conn = http_connection(parts)
-            conn.request("GET", starting_url)
-            code = conn.getresponse().status
-            if code < 300:
-                ending_url = conn.getresponse().headers['Location']
-            else: # We handle redirections & errors later below.
-                ending_url = starting_url
+            cookie_jar = requests.cookies.RequestsCookieJar()
+            requests.utils.add_dict_to_cookiejar(cookie_jar, cookies)
+            conn = requests.get(starting_url, cookies = cookie_jar, headers = headers)
+            if conn.history:
+                # Redirection occured.  Get the first status code.
+                code = conn.history[0].status_code
+            else:
+                code = conn.status_code
+            ending_url = conn.url
     except socket.gaierror as err:        # gai stands for getaddrinfo()
-        if err.errno == 8:
-            return (starting_url, None, None, "Cannot resolve host name")
-        else:
-            return (starting_url, None, None, str(err))
+        return (starting_url, None, None,
+                "Cannot resolve host name" if err.errno == 8 else str(err))
     except http.client.InvalidURL as err:
         # Docs for HTTPResponse say this is raised if port info is bad.
         return (starting_url, None, None, "Bad port")
+    except ProxyLoginError as err:
+        return (starting_url, None, None, "Proxy login failure")
+    except ProxyException as err:
+        return (starting_url, None, None, str(err))
+    except NetworkError as err:
+        return (starting_url, None, None, str(err))
     except Exception as err:
         if __debug__: log('Error accessing {}: {}'.format(starting_url, str(err)))
         raise
 
     # Interpret the response.
     if __debug__: log('Got response code {} for {}'.format(code, starting_url))
-    if code in [200, 204, 206]:
-        return (url, ending_url, code, None)
-    elif code == 202:
+    if code == 202:
         # Code 202 = Accepted, "received but not yet acted upon."
         if __debug__: log('Pausing & retrying')
-        sleep(1)                        # Arbitrary.
-        final_data = _followed_url(starting_url, proxy_helper) # Try again.
+        sleep(1)                        # Sleep a short time and try again.
+        final_data = _analysis(starting_url, cookies, headers, proxy_helper)
         # Return the original response code, not the subsequent one.
         return (url, final_data[1], code, None)
-    elif code in [301, 302, 303, 308]:
-        # Redirected.  Note: I previously followed the redirections manually
-        # by using the 'Location' http header, but then ran into this value:
-        # https://ieeexplore.ieee.orghttp://ieeexplore.ieee.org/xpl/conhome.jsp?punumber=1000245
-        # i.e., a mangled value for the 'Location' header.  I gave up and used
-        # urlopen instead, which seems to deal with the situation better.
-        try:
-            # Setting the user agent is because Proquest.com returns a 403
-            # otherwise, possibly as an attempt to block automated scraping.
-            # Changing the user agent to a browser name seems to solve it.
-            r_url = Request(ending_url, headers = {"User-Agent" : "Mozilla/5.0"})
-            redirected = urlopen(r_url)
-        except Exception as err:
-            return (url, None, err.code, str(err))
-        new_url = redirected.geturl()
-        if __debug__: log('Redirected to {}'.format(new_url))
-        return (url, new_url, code, None)
+    elif 200 <= code < 400:
+        return (url, ending_url, code, None)
     else:
         return (url, None, code, "Unable to resolve URL")
 
