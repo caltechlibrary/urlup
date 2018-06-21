@@ -16,6 +16,7 @@ file "LICENSE" for more information.
 
 import getpass
 import keyring
+import sys
 
 
 # Credentials/keyring functions
@@ -83,7 +84,7 @@ def obtain_credentials(service, display_name,
     if not user:
         user = s_user or input("{} user name: ".format(display_name))
     if not pswd:
-        pswd = s_pswd or getpass.getpass('{} password: '.format(display_name))
+        pswd = s_pswd or getpassword('{} password: '.format(display_name))
 
     return (user, pswd, host, port)
 
@@ -101,6 +102,16 @@ def _encode(user, pswd, host, port):
 
 def _decode(value_string):
     return tuple(value_string.split(_sep))
+
+
+def getpassword(prompt):
+    # If it's a tty, use the version that doesn't echo the password.
+    if sys.stdin.isatty():
+        return getpass.getpass(prompt)
+    else:
+        sys.stdout.write(prompt)
+        sys.stdout.flush()
+        return sys.stdin.readline().rstrip()
 
 
 # For Emacs users
