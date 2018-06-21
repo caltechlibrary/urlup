@@ -1,7 +1,7 @@
 urlup<img width="100px" align="right" src=".graphics/noun_1581155_cc.svg">
 =====
 
-Urlup is a small utility program and Python 3 package to dereference URLs and determine their final destinations after following redirections.  _Urlup_ can be pronounced "_urrrl-up_".
+Urlup is a utility program and Python 3 package to dereference URLs and determine their final destinations after following redirections.  _Urlup_ can be pronounced "_urrrl-up_".
 
 *Authors*:      [Michael Hucka](http://github.com/mhucka)<br>
 *Repository*:   [https://github.com/caltechlibrary/urlup](https://github.com/caltechlibrary/urlup)<br>
@@ -16,7 +16,7 @@ Urlup is a small utility program and Python 3 package to dereference URLs and de
 ☀ Introduction
 -----------------------------
 
-Sometimes we have a list of URLs and we need to find out the ultimate destinations after any redirections have taken place. _Urlup_ is a simple program to dereference a list of URLs for that purpose.  It provides diagnostics and HTTP status codes if desired.  It can be used from the command line, and it also provides a Python 3 module that can be called programmatically.
+Sometimes we have a list of URLs and we need to find out the ultimate destinations after any redirections have taken place. _Urlup_ is a simple program to dereference a list of URLs for that purpose.  It handles EZproxy proxied URLs (a common type of proxy used by institutional libraries).  It provides diagnostics and HTTP status codes if desired.  It can be used from the command line, and it also provides a Python 3 module that can be called programmatically.
 
 
 ✺ Installation instructions
@@ -89,6 +89,11 @@ Here is a screen cast to demonstrate. Click on the following image:
 [![demo](.graphics/urlup-asciinema.png)](https://asciinema.org/a/KoUQHTVrzWpSK7aNL3P3TfhTF)
 
 
+### Proxy handling
+
+If the URLs to be dereference involve a proxy server (such as [EZproxy](https://www.oclc.org/en/ezproxy.html), a common type of proxy used by libraries), it will be necessary for Urlup to obtain login credentials for the proxy server.  Urlup uses your operating system's keyring/keychain functionality to ask for and store the credentials.  The first time Urlup needs to get proxy credentials, it will prompt you for the credentials and then store them using your operating system's keyring/keychain functionality, so that it does not have to prompt again in the future.  You can disable the use of the keyring/keychain by running Urlup with the `-X` (or `/X` on Windows) command-line flag.  It is also possible to supply the information directly on the command line using the `-u` and `-p` options (or `/u` and `/p` on Windows), but this is discouraged because it is insecure on multiuser computer systems.
+
+
 ### Module API 
 
 Urlup provides a single function, `updated_urls()`, that can be called from other Python programs to dereference one or more URLs.  If given a single URL, it returns a single result; if give a list, it returns a list of results.  Each result is in the form of a named tuple called `UrlData`.  The tuple has 4 fields:
@@ -123,6 +128,18 @@ Status code: 302
 Original URL: http://notarealurl.nowhere
 Error: Cannot resolve host name
 ```
+
+The function `updated_urls` takes the following arguments:
+
+* _urls_: a single URL or a list of URLs
+* _cookies_: a dictionary of key-value pairs representing cookies to be set when making network connections
+* _headers_: a dictionary of headers to add to every URL lookup
+* _proxy_user__: a user login for a proxy, if a proxy will be encountered
+* _proxy_pswd_: a password for the proxy, if a proxy will be encountered
+* _use_keyring_: whether the system keyring/keychain should be used (default is `False`)
+* _quiet_: whether to print messages while working (default is `True`, meaning, don't print a lot of messages)
+* _explain_: whether to explain HTTP status codes encountered (default is `False`, meaning, don't print explanations)
+* _colorize_: whether to color-code any messages printed (default is `False`)
 
 
 ⁇ Getting help and support
