@@ -115,10 +115,10 @@ def _url_data(url, cookies, headers, proxy_helper, quiet, explain, colorize):
         return ()
     retry = True
     failures = 0
-    error = None
     sleep_time = 2
     while retry and failures < _MAX_RETRIES:
         retry = False
+        error = None
         try:
             (old, new, code, error) = _analysis(url, cookies, headers, proxy_helper)
             if not quiet:
@@ -137,15 +137,17 @@ def _url_data(url, cookies, headers, proxy_helper, quiet, explain, colorize):
                                               color(new, severity(code), colorize),
                                               color('[' + str(code) + ']', 'dark', colorize)))
             return UrlData(old, new, code, error)
+        except requests.exceptions.ConnectTimeout as err:
+            if not quiet:
+                msg('{} connection timed out'.format(url), 'error', colorize)
+            return UrlData(url, None, None, 'Timed out trying to connect')
         except Exception as err:
-            # If we fail, try again, in case it's a network interruption
+            # If we fail, try again in case it's actually due to a network issue
             if __debug__: log('{}: {}', url, err)
             failures += 1
-            error = err
             if not quiet:
-                msg('{} problem: {}'.format(url, err), 'warn', colorize)
+                msg('{} timed out: {}'.format(url, err), 'warn', colorize)
                 msg('Retrying in {}s ...'.format(sleep_time), 'warn', colorize)
-            if __debug__: log('retrying in {}s', sleep_time)
             sleep(sleep_time)
             sleep_time *= _SLEEP_FACTOR
             retry = True
@@ -161,9 +163,8 @@ def _url_data(url, cookies, headers, proxy_helper, quiet, explain, colorize):
 
 def _analysis(url, cookies, headers, proxy_helper):
     if __debug__: log('Looking up {}'.format(url))
-    starting_url = url
-    parts, valid = url_parts(url)
-    if not valid:
+    starting_url = normalized_url(url)
+    if not starting_url:
         return (url, None, None, "Malformed URL")
 
     # Connect to the host.
@@ -174,14 +175,16 @@ def _analysis(url, cookies, headers, proxy_helper):
             real_url = proxy_helper.proxied_url(starting_url)
             cookie_jar = proxy_helper.cookies(starting_url)
             requests.utils.add_dict_to_cookiejar(cookie_jar, cookies)
-            conn = requests.post(real_url, cookies = cookie_jar, headers = headers)
+            conn = requests.post(real_url, cookies = cookie_jar,
+                                 headers = headers, timeout = _NETWORK_TIMEOUT)
             code = conn.status_code
             ending_url = conn.url
         else:
             if __debug__: log('URL has no proxy -- going straight to it')
             cookie_jar = requests.cookies.RequestsCookieJar()
             requests.utils.add_dict_to_cookiejar(cookie_jar, cookies)
-            conn = requests.get(starting_url, cookies = cookie_jar, headers = headers)
+            conn = requests.get(starting_url, cookies = cookie_jar,
+                                headers = headers, timeout = _NETWORK_TIMEOUT)
             if conn.history:
                 # Redirection occured.  Get the first status code.
                 code = conn.history[0].status_code
@@ -229,10 +232,9 @@ def http_connection(parts):
         return http.client.HTTPConnection(parts.netloc, timeout=_NETWORK_TIMEOUT)
 
 
-def url_parts(url):
+def normalized_url(url):
     # Returns two values: a SplitResult value (from urllib) and a Boolean
     parts = urlsplit(url)
-    # Do some sanity checking.
     if not parts.netloc:
         if not parts.scheme and not parts.path:
             return (parts, False)
@@ -241,9 +243,11 @@ def url_parts(url):
             starting_url = 'http://' + parts.path
             if __debug__: log('Rewrote {} to {}'.format(url, starting_url))
             parts = urlsplit(starting_url)
-            if not parts.netloc:
-                return (parts, False)
-    return (parts, True)
+            if parts.netloc:
+                return starting_url
+            else:
+                return None
+    return url
 
 
 def severity(code):
