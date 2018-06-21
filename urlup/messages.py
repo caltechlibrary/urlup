@@ -65,7 +65,7 @@ def color(text, flags = None, colorize = True):
 def color_codes(flags):
     color_name  = ''
     prefix = ''
-    attrib = []
+    attrib = ['bold'] if sys.platform.startswith('win') else []
     if type(flags) is not list:
         flags = [flags]
     if 'error' in flags:
