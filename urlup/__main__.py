@@ -34,6 +34,7 @@ from urlup.messages import color, msg
 # ......................................................................
 
 @plac.annotations(
+    cookies    = ('list of cookie value pairs separated by commas',  'option', 'c'),
     explain    = ('print explanations of HTTP codes encountered',    'flag',   'e'),
     input      = ('read URLs from file F',                           'option', 'i'),
     output     = ('write results to file R',                         'option', 'o'),
@@ -46,7 +47,8 @@ from urlup.messages import color, msg
     url        = 'URL to dereference (can supply more than one)',
 )
 
-def main(explain = False, input='F', output='R', user = 'U', pswd = 'P',
+def main(cookies = {}, explain = False,
+         input='F', output='R', user = 'U', pswd = 'P',
          quiet=False, no_color=False, no_keyring=False, version=False, *url):
     '''Find the ultimate destination for URLs after following redirections.
 
@@ -84,6 +86,11 @@ If you ever need to change the information in the keyring/keychain, you can
 run this program again with the -X option, and it will ask you for the values
 and store them in the keyring again.
 
+Connections can be optionally passed session cookie values on the command
+line using the -c (or /c on Windows) argument.  The argument should be
+followed by a list of key=value pairs separated by commas without spaces.
+Example: "acookie=avalue,anothercookie=anothervalue".
+
 This program will print information to the terminal as it processes URLs,
 unless the option -q (or /q on Windows) is given to make it more quiet.
 '''
@@ -104,11 +111,8 @@ unless the option -q (or /q on Windows) is given to make it more quiet.
         print('URL: {}'.format(urlup.__url__))
         print('License: {}'.format(urlup.__license__))
         sys.exit()
-
-    if on_windows:
-        get_help = '(Hint: use /h to get help.)'
-    else:
-        get_help = '(Hint: use -h to get help.)'
+    # We use default values that provide more intuitive help text printed by
+    # plac.  Rewrite the values to things we actually use.
     if input == 'F' and not path.exists('F'):
         input = None
     if output == 'R':
@@ -117,6 +121,10 @@ unless the option -q (or /q on Windows) is given to make it more quiet.
         user = None
     if pswd == 'P':
         pswd = None
+    if on_windows:
+        get_help = '(Hint: use /h to get help.)'
+    else:
+        get_help = '(Hint: use -h to get help.)'
     if not input and not url:
         raise SystemExit(color('Need a file or URLs as argument. ' + get_help,
                                'error', colorize))
@@ -127,6 +135,8 @@ unless the option -q (or /q on Windows) is given to make it more quiet.
         msg("No output file specified; results won't be saved.", 'warn', colorize)
     elif not quiet:
         rename_if_existing(output, colorize)
+    if cookies:
+        cookies = dictify_cookie_list(cookies)
 
     ulist = []
     results = []
@@ -151,7 +161,8 @@ unless the option -q (or /q on Windows) is given to make it more quiet.
                 raise SystemExit(color('{} does not appear to be a URL'.format(url[0]),
                                        'error', colorize))
             ulist = url
-        results = updated_urls(ulist, user, pswd, use_keyring, quiet, explain, colorize)
+        results = updated_urls(ulist, cookies, {}, user, pswd, use_keyring,
+                               quiet, explain, colorize)
 
         if not results:
             msg('No results returned.')
@@ -212,6 +223,14 @@ def rename_if_existing(file, colorize):
     if path.exists(full_path):
         rename(full_path)
         return
+
+
+def dictify_cookie_list(cookie_list):
+    cookies = {}
+    for pair in cookie_list.split(','):
+        kv = pair.split('=')
+        cookies[kv[0]] = kv[1]
+    return cookies
 
 
 # Main entry point.
