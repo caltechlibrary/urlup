@@ -14,8 +14,13 @@ open-source software released under a 3-clause BSD license.  Please see the
 file "LICENSE" for more information.
 '''
 
+import sys
+
 try:
     from termcolor import colored
+    if sys.platform.startswith('win'):
+        import colorama
+        colorama.init()
 except:
     pass
 
