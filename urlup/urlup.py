@@ -254,7 +254,7 @@ def severity(code):
     if code < 300:
         return 'info'
     elif code < 400:
-        return 'blue'
+        return 'cyan'
     else:
         return 'error'
 
