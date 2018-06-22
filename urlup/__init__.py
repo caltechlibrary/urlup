@@ -24,4 +24,4 @@ from .urlup import updated_urls, UrlData
 # Supporting modules.
 from .messages import msg, color
 from .http_code import code_meaning
-from .errors import ProxyLoginError, ProxyException
+from .errors import ProxyLoginError, ProxyException, NetworkError
