@@ -21,7 +21,7 @@ try:
     if sys.platform.startswith('win'):
         import colorama
         colorama.init()
-except:
+except ImportError:
     pass
 
 

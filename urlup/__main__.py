@@ -21,7 +21,7 @@ import plac
 import sys
 try:
     from termcolor import colored
-except:
+except ImportError:
     pass
 from   uritools import urisplit
 
