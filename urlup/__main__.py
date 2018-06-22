@@ -185,7 +185,7 @@ unless the option -q (or /q on Windows) is given to make it more quiet.
             msg('Results:')
             if not isinstance(results, list):
                 results = [results]
-            for item in results:
+            for item in filter(None, results):
                 if item.error:
                     msg('Encountered error {} dereferencing {}'
                         .format(item.error, item.original), 'error', colorize)
