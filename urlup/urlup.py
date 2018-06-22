@@ -31,6 +31,8 @@ import textwrap
 from   time import time, sleep
 from   urllib.parse import urlsplit, quote_plus
 from   urllib.request import urlopen, Request
+import urllib3.exceptions
+import validators
 
 try:
     thisdir = os.path.dirname(os.path.abspath(__file__))
@@ -146,7 +148,7 @@ def _url_data(url, cookies, headers, proxy_helper, quiet, explain, colorize):
             if __debug__: log('{}: {}', url, err)
             failures += 1
             if not quiet:
-                msg('{} timed out: {}'.format(url, err), 'warn', colorize)
+                msg('{} connection attempt failed: {}'.format(url, err), 'warn', colorize)
                 msg('Retrying in {}s ...'.format(sleep_time), 'warn', colorize)
             sleep(sleep_time)
             sleep_time *= _SLEEP_FACTOR
@@ -165,7 +167,9 @@ def _analysis(url, cookies, headers, proxy_helper):
     if __debug__: log('Looking up {}'.format(url))
     starting_url = normalized_url(url)
     if not starting_url:
-        return (url, None, None, "Malformed URL")
+        return (url, None, None, 'Malformed URL')
+    if not network_available():
+        return (url, None, None, 'Network appears disconnected')
 
     # Connect to the host.
     cookie_jar = None
@@ -191,18 +195,21 @@ def _analysis(url, cookies, headers, proxy_helper):
             else:
                 code = conn.status_code
             ending_url = conn.url
-    except socket.gaierror as err:        # gai stands for getaddrinfo()
-        return (starting_url, None, None,
-                "Cannot resolve host name" if err.errno == 8 else str(err))
+    except requests.exceptions.ConnectionError as err:
+        if err.args and isinstance(err.args[0], urllib3.exceptions.MaxRetryError):
+            if 'not known' in str(err):
+                return (starting_url, None, None, 'Cannot resolve host name')
+            else:
+                raise
+    except requests.exceptions.InvalidSchema as err:
+        return (starting_url, None, None, "Unsupported network protocol")
     except http.client.InvalidURL as err:
         # Docs for HTTPResponse say this is raised if port info is bad.
+        if __debug__: log('Error accessing {}: {}'.format(starting_url, str(err)))
         return (starting_url, None, None, "Bad port")
-    except ProxyLoginError as err:
+    except (ProxyLoginError, ProxyException, NetworkError) as err:
+        if __debug__: log('Error accessing {}: {}'.format(starting_url, str(err)))
         return (starting_url, None, None, "Proxy login failure")
-    except ProxyException as err:
-        return (starting_url, None, None, str(err))
-    except NetworkError as err:
-        return (starting_url, None, None, str(err))
     except Exception as err:
         if __debug__: log('Error accessing {}: {}'.format(starting_url, str(err)))
         raise
@@ -225,6 +232,11 @@ def _analysis(url, cookies, headers, proxy_helper):
 # Misc. utilities
 # .............................................................................
 
+def network_available():
+    '''Return True if it appears we have a network connection, False if not'''
+    return socket.gethostbyname(socket.gethostname()) != '127.0.0.1'
+
+
 def http_connection(parts):
     if parts.scheme == 'https':
         return http.client.HTTPSConnection(parts.netloc, timeout=_NETWORK_TIMEOUT)
@@ -235,18 +247,22 @@ def http_connection(parts):
 def normalized_url(url):
     # Returns two values: a SplitResult value (from urllib) and a Boolean
     parts = urlsplit(url)
-    if not parts.netloc:
-        if not parts.scheme and not parts.path:
-            return (parts, False)
-        elif parts.path and not parts.scheme:
-            # Most likely case is the user typed a host or domain name only
-            starting_url = 'http://' + parts.path
-            if __debug__: log('Rewrote {} to {}'.format(url, starting_url))
-            parts = urlsplit(starting_url)
-            if parts.netloc:
-                return starting_url
-            else:
-                return None
+    if parts.netloc:
+        if validators.domain(parts.netloc):
+            return url
+        else:
+            return None
+    elif not parts.scheme and not parts.path:
+        return None
+    elif parts.path and not parts.scheme:
+        # Most likely case is the user typed a host or domain name only
+        starting_url = 'http://' + parts.path
+        if __debug__: log('Rewrote {} to {}'.format(url, starting_url))
+        parts = urlsplit(starting_url)
+        if parts.netloc and validators.domain(parts.netloc):
+            return starting_url
+        else:
+            return None
     return url
 
 
