@@ -195,7 +195,9 @@ def _analysis(url, cookies, headers, proxy_helper):
             ending_url = conn.url
     except requests.exceptions.ConnectionError as err:
         if err.args and isinstance(err.args[0], urllib3.exceptions.MaxRetryError):
-            if 'not known' in str(err):
+            # I see different error strings on Windows vs mac.
+            serr = str(err)
+            if 'not known' in serr or 'getaddrinfo failed' in serr:
                 return (starting_url, None, None, 'Cannot resolve host name')
             else:
                 raise
