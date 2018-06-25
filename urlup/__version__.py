@@ -6,7 +6,7 @@
 # @website https://github.com/caltechlibrary/urlup
 # =============================================================================
 
-__version__     = '1.3.0'
+__version__     = '1.3.1'
 __title__       = 'urlup'
 __description__ = 'A small utility program and Python 3 module to dereference URLs and determine their final destinations after following redirections.'
 __url__         = 'https://github.com/caltechlibrary/urlup'
