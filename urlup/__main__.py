@@ -18,6 +18,7 @@ import csv
 import os
 import os.path as path
 import plac
+import requests
 import sys
 try:
     from termcolor import colored
@@ -138,6 +139,11 @@ unless the option -q (or /q on Windows) is given to make it more quiet.
     if cookies:
         cookies = dictify_cookie_list(cookies)
 
+    # General sanity checks.
+    if not network_available():
+        raise SystemExit(color('No network', 'error', colorize))
+
+    # Let's do this thing.
     ulist = []
     results = []
     try:
@@ -231,6 +237,15 @@ def dictify_cookie_list(cookie_list):
         kv = pair.split('=')
         cookies[kv[0]] = kv[1]
     return cookies
+
+
+def network_available():
+    '''Return True if it appears we have a network connection, False if not'''
+    try:
+        r = requests.get("https://www.caltech.edu")
+        return True
+    except requests.ConnectionError:
+        return False
 
 
 # Main entry point.

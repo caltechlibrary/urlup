@@ -168,8 +168,6 @@ def _analysis(url, cookies, headers, proxy_helper):
     starting_url = normalized_url(url)
     if not starting_url:
         return (url, None, None, 'Malformed URL')
-    if not network_available():
-        return (url, None, None, 'Network appears disconnected')
 
     # Connect to the host.
     cookie_jar = None
@@ -231,11 +229,6 @@ def _analysis(url, cookies, headers, proxy_helper):
 
 # Misc. utilities
 # .............................................................................
-
-def network_available():
-    '''Return True if it appears we have a network connection, False if not'''
-    return socket.gethostbyname(socket.gethostname()) != '127.0.0.1'
-
 
 def http_connection(parts):
     if parts.scheme == 'https':
