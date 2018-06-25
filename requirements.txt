@@ -4,3 +4,4 @@ plac>=0.9.6
 uritools>=2.1.0
 keyring>=12.2.0
 requests>=2.18.0
+validators>=0.12.0
