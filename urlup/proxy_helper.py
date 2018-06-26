@@ -77,19 +77,24 @@ class ProxyHelper():
     _use_keyring = True
     _user = None
     _pswd = None
+    _reset = False
     _auth_data = {}
 
-    def __init__(self, proxy_user, proxy_pswd, use_keyring = True):
+    def __init__(self, proxy_user, proxy_pswd, use_keyring = True, reset = False):
         '''Initialize a proxy helper.  Parameters 'proxy_user' and 'proxy_pswd'
         are to be used when the user supplies credentials for the proxy host;
         they can be left None, in which case, ProxyHelper will either use
         the keyring/keychain facility or ask the user at the time that the
         method authenticate_proxy() is called.  If 'use_keyring' is False,
-        then the keyring/keychain approach is not used.
+        then the keyring/keychain approach is not used.  If 'reset' is True,
+        then it will ask the user for a proxy login and password even if it
+        already has the information, and will overwrite the information in the
+        keyring (unless 'use_keyring' is False).
         '''
         self._user = proxy_user
         self._pswd = proxy_pswd
         self._use_keyring = use_keyring
+        self._reset = reset
         if __debug__: log('Initizlied proxy helper with user {}, password {}'
                           .format(proxy_user, proxy_pswd))
 
@@ -108,13 +113,15 @@ class ProxyHelper():
         '''
         proxy_host = self.proxy_host_from_url(url)
         if __debug__: log('Authenticating to proxy host {}'.format(proxy_host))
-        if not self._user or not self._pswd:
-            if self._use_keyring:
+        if not self._user or not self._pswd or self._reset:
+            if self._use_keyring and not self._reset:
                 if __debug__: log('Getting credentials from keyring')
                 self._user, self._pswd, _, _ = obtain_credentials(
                     _KEYRING, "Proxy login", self._user, self._pswd)
             else:
-                if __debug__: log('Keyring disabled; asking user for credentials')
+                if __debug__: log('Keyring disabled')
+                if self._reset:
+                    if __debug__: log('Reset invoked')
                 self._user = input('Proxy login: ')
                 self._pswd = getpass.getpass('Password for "{}": '.format(self._user))
         if self._use_keyring:

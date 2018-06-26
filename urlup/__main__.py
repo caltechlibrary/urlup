@@ -43,6 +43,7 @@ from urlup.messages import color, msg
     user       = ('proxy user name',                                 'option', 'u'),
     quiet      = ('do not print messages while working',             'flag',   'q'),
     no_color   = ('do not color-code terminal output (default: do)', 'flag',   'C'),
+    reset      = ('reset proxy user name and password',              'flag',   'R'),
     version    = ('print version info and exit',                     'flag',   'V'),
     no_keyring = ('do not use a keyring',                            'flag',   'X'),
     url        = 'URL to dereference (can supply more than one)',
@@ -50,7 +51,8 @@ from urlup.messages import color, msg
 
 def main(cookies = {}, explain = False,
          input='F', output='R', user = 'U', pswd = 'P',
-         quiet=False, no_color=False, no_keyring=False, version=False, *url):
+         quiet=False, no_color=False, reset=False, no_keyring=False,
+         version=False, *url):
     '''Find the ultimate destination for URLs after following redirections.
 
 If the command-line option -i (or /i on Windows) is not provided, this
@@ -80,6 +82,12 @@ that it does not have to ask again in the future.  It is also possible to
 supply the information directly on the command line using the -u and -p
 options (or /u and /p on Windows), but this is discouraged because it is
 insecure on multiuser computer systems.
+
+To reset the user name and password (e.g., if a mistake was made the last time
+and the wrong credentials were stored in the keyring/keychain system), add the
+-R (or /R on Windows) command-line argument to a command.  The next time
+Urlup needs to use a proxy login, it will query for the user name and password
+again even if an entry already exists in the keyring or keychain.
 
 Currently, the use of only a single EZProxy proxy is supported.
 
@@ -168,7 +176,7 @@ unless the option -q (or /q on Windows) is given to make it more quiet.
                                        'error', colorize))
             ulist = url
         results = updated_urls(ulist, cookies, {}, user, pswd, use_keyring,
-                               quiet, explain, colorize)
+                               reset, quiet, explain, colorize)
 
         if not results:
             msg('No results returned.')

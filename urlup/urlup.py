@@ -95,14 +95,15 @@ UrlData.__doc__ = '''Data about the eventual destination of a given URL.
 # .............................................................................
 
 def updated_urls(urls, cookies = {}, headers = {},
-                 proxy_user = None, proxy_pswd = None, use_keyring = True,
+                 proxy_user = None, proxy_pswd = None,
+                 use_keyring = True, reset = False,
                  quiet = True, explain = False, colorize = False):
     '''Update one URL or a list of URLs.  If given a single URL, it returns a
     single tuple of the following form:
        (old URL, new URL, http status code, error)
     If given a list of URLs, it returns a list of tuples of the same form.
     '''
-    helper = ProxyHelper(proxy_user, proxy_pswd, use_keyring)
+    helper = ProxyHelper(proxy_user, proxy_pswd, use_keyring, reset)
     if isinstance(urls, (list, tuple, Iterable)) and not isinstance(urls, str):
         return [_url_data(url, cookies, headers, helper, quiet, explain, colorize)
                 for url in urls]
