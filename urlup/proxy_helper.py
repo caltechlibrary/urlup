@@ -119,7 +119,8 @@ class ProxyHelper():
                 self._user, self._pswd, _, _ = obtain_credentials(
                     _KEYRING, "Proxy login", self._user, self._pswd)
             else:
-                if __debug__: log('Keyring disabled')
+                if self._use_keyring:
+                    if __debug__: log('Keyring disabled')
                 if self._reset:
                     if __debug__: log('Reset invoked')
                 self._user = input('Proxy login: ')
