@@ -91,10 +91,6 @@ again even if an entry already exists in the keyring or keychain.
 
 Currently, the use of only a single EZProxy proxy is supported.
 
-If you ever need to change the information in the keyring/keychain, you can
-run this program again with the -X option, and it will ask you for the values
-and store them in the keyring again.
-
 Connections can be optionally passed session cookie values on the command
 line using the -c (or /c on Windows) argument.  The argument should be
 followed by a list of key=value pairs separated by commas without spaces.
