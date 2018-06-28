@@ -264,7 +264,7 @@ def normalized_url(url):
     # Returns two values: a SplitResult value (from urllib) and a Boolean
     parts = urlsplit(url)
     if parts.netloc:
-        if validators.domain(parts.netloc):
+        if validators.domain(host_from_netloc(parts.netloc)):
             return url
         else:
             return None
@@ -275,11 +275,15 @@ def normalized_url(url):
         starting_url = 'http://' + parts.path
         if __debug__: log('Rewrote {} to {}'.format(url, starting_url))
         parts = urlsplit(starting_url)
-        if parts.netloc and validators.domain(parts.netloc):
+        if parts.netloc and validators.domain(host_from_netloc(parts.netloc)):
             return starting_url
         else:
             return None
     return url
+
+
+def host_from_netloc(nl):
+    return nl[:nl.find(':')] if ':' in nl else nl
 
 
 def severity(code):
