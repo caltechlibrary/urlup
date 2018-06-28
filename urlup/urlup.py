@@ -172,9 +172,11 @@ def _analysis(url, cookies, headers, proxy_helper):
 
     # Connect to the host.
     cookie_jar = None
+    using_proxy = False
     try:
         if proxy_helper.url_contains_proxy(starting_url):
             if __debug__: log('URL uses a proxy: {}'.format(starting_url))
+            using_proxy = True
             real_url = proxy_helper.proxied_url(starting_url)
             cookie_jar = proxy_helper.cookies(starting_url)
             requests.utils.add_dict_to_cookiejar(cookie_jar, cookies)
@@ -199,7 +201,11 @@ def _analysis(url, cookies, headers, proxy_helper):
             # I see different error strings on Windows vs mac.
             serr = str(err)
             if 'not known' in serr or 'getaddrinfo failed' in serr:
-                return (starting_url, None, None, 'Cannot resolve host name')
+                if using_proxy:
+                    msg = 'Proxy is unable to resolve the destination host name'
+                else:
+                    msg = 'Cannot resolve host name'
+                return (starting_url, None, None, msg)
             else:
                 raise
     except requests.exceptions.InvalidSchema as err:
