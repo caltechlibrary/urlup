@@ -180,8 +180,8 @@ def _analysis(url, cookies, headers, proxy_helper):
             real_url = proxy_helper.proxied_url(starting_url)
             cookie_jar = proxy_helper.cookies(starting_url)
             requests.utils.add_dict_to_cookiejar(cookie_jar, cookies)
-            conn = requests.post(real_url, cookies = cookie_jar,
-                                 headers = headers, timeout = _NETWORK_TIMEOUT)
+            conn = requests.get(real_url, cookies = cookie_jar,
+                                headers = headers, timeout = _NETWORK_TIMEOUT)
             code = conn.status_code
             ending_url = conn.url
         else:
