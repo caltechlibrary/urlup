@@ -226,6 +226,20 @@ def _analysis(url, cookies, headers, proxy_helper):
         return (url, final_data[1], code, None)
     elif 200 <= code < 400:
         return (url, ending_url, code, None)
+    elif code in [401, 402, 403, 407, 451, 511]:
+        return (url, None, code, "Access is forbidden or requires authentication")
+    elif code in [404, 410]:
+        return (url, None, code, "No content found at this location")
+    elif code in [405, 406, 409, 411, 412, 414, 417, 428, 431, 505, 510]:
+        return (url, None, code, "Server returned code {} -- please report this".format(code))
+    elif code in [415, 416]:
+        return (url, None, code, "Server rejected the request")
+    elif code == 429:
+        return (url, None, code, "Server blocking further requests due to rate limits")
+    elif code == 503:
+        return (url, None, code, "Server is unavailable -- try again later")
+    elif code in [500, 501, 502, 506, 507, 508]:
+        return (url, None, code, "Internal server error")
     else:
         return (url, None, code, "Unable to resolve URL")
 
