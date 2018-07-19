@@ -18,6 +18,10 @@ import getpass
 import keyring
 import sys
 
+if sys.platform.startswith('win'):
+    import keyring.backends
+    from keyring.backends.Windows import WinVaultKeyring
+
 
 # Credentials/keyring functions
 # .............................................................................
@@ -51,6 +55,8 @@ def get_credentials(service, user=None):
     service with a different user login name than the user's current login
     name without having to ask the user for the alternative name every time.
     '''
+    if sys.platform.startswith('win'):
+        keyring.set_keyring(WinVaultKeyring())
     value = keyring.get_password(service, user if user else 'credentials')
     return _decode(value) if value else (None, None, None, None)
 
@@ -61,6 +67,8 @@ def save_credentials(service, user, pswd, host=None, port=None):
     pswd = pswd if pswd else ''
     host = host if host else ''
     port = port if port else ''
+    if sys.platform.startswith('win'):
+        keyring.set_keyring(WinVaultKeyring())
     keyring.set_password(service, 'credentials', _encode(user, pswd, host, port))
 
 
