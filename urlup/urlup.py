@@ -212,10 +212,10 @@ def _analysis(url, cookies, headers, proxy_helper):
         return (starting_url, None, None, "Unsupported network protocol")
     except http.client.InvalidURL as err:
         # Docs for HTTPResponse say this is raised if port info is bad.
-        if __debug__: log('Error accessing {}: {}'.format(starting_url, str(err)))
+        if __debug__: log('Bad port in {}: {}'.format(starting_url, str(err)))
         return (starting_url, None, None, "Bad port")
     except (ProxyLoginError, ProxyException, NetworkError) as err:
-        if __debug__: log('Error accessing {}: {}'.format(starting_url, str(err)))
+        if __debug__: log('Proxy error: {}'.format(starting_url, str(err)))
         return (starting_url, None, None, "Proxy login failure")
     except Exception as err:
         if __debug__: log('Error accessing {}: {}'.format(starting_url, str(err)))
