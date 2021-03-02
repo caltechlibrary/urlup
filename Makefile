@@ -42,12 +42,15 @@ platform   := $(shell python3 -c 'import sys; print(sys.platform)')
 arch       := $(shell python3 -c 'import platform; print(platform.machine())')
 macos_vers := $(shell sw_vers -productVersion 2>/dev/null | cut -f1-2 -d'.' || true)
 
+about-file := ABOUT.html
+github-css := dev/github-css/github-markdown-css.html
+
 $(info Gathering data ... Done.)
 
 
 # make binary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-build: | dependencies build-$(platform)
+build: | dependencies $(about-file) build-$(platform)
 
 build-darwin: dist/urlup
 
@@ -59,6 +62,11 @@ dist/urlup:
 
 dependencies:;
 	pip3 install -r requirements.txt
+
+$(about-file): README.md
+	pandoc --standalone --quiet -f gfm -H $(github-css) -o README.html README.md
+	inliner -n < README.html > ABOUT.html
+	rm -f README.html
 
 
 # make release ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -146,7 +154,7 @@ clean-release:;
 	-rm -rf $(name).egg-info codemeta.json.bak $(init_file).bak README.md.bak
 
 clean-other:;
-	-rm -fr $(name)/__pycache__
+	-rm -fr $(name)/__pycache__ $(about-file)
 
 .PHONY: release release-on-github update-init-file update-codemeta-file \
 	print-instructions create-dist clean test-pypi pypi
