@@ -69,3 +69,4 @@ build
 dist
 *.egg-info
 dev/installers/windows/urlup_innosetup_script.iss
+ABOUT.html
