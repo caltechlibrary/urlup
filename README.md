@@ -1,4 +1,4 @@
-urlup<img width="100px" align="right" src=".graphics/noun_1581155_cc.svg">
+urlup<img width="10%" align="right" src=".graphics/urlup-icon.png">
 =====
 
 Urlup is a utility program and Python 3 package to dereference URLs and determine their final destinations after following redirections.  _Urlup_ can be pronounced "_urrrl-up_".
@@ -8,9 +8,9 @@ Urlup is a utility program and Python 3 package to dereference URLs and determin
 *License*:      BSD 3-clause license &ndash; see the [LICENSE](LICENSE) file for more information
 
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg?style=flat-square)](https://choosealicense.com/licenses/bsd-3-clause)
-[![Python](https://img.shields.io/badge/Python-3.4+-brightgreen.svg?style=flat-square)](http://shields.io)
-[![Python](https://img.shields.io/badge/PyPI-1.4.2-d8b44f.svg?style=flat-square)](https://pypi.org/project/urlup/)
-[![Latest release](https://img.shields.io/badge/Latest_release-1.4.2-b44e88.svg?style=flat-square)](http://shields.io)
+[![Python](https://img.shields.io/badge/Python-3.6+-brightgreen.svg?style=flat-square)](http://shields.io)
+[![PyPI](https://img.shields.io/pypi/v/urlup.svg?style=flat-square&color=yellow)](https://pypi.org/project/topi/)
+[![Latest release](https://img.shields.io/github/v/release/caltechlibrary/urlup.svg?style=flat-square&color=b44e88)](https://github.com/caltechlibrary/urlup/releases)
 [![DOI](http://img.shields.io/badge/DOI-10.22002%20%2F%20D1.973-blue.svg?style=flat-square)](https://data.caltech.edu/records/973)
 
 
@@ -23,30 +23,17 @@ Sometimes we have a list of URLs and we need to find out the ultimate destinatio
 ✺ Installation instructions
 ---------------------------
 
-Urlup is available in a variety of forms.  You can chose whatever installation approach suits you.
+The instructions below assume you have a Python interpreter installed on your computer; if that's not the case, please first [install Python version 3](INSTALL-Python3.md) and familiarize yourself with running Python programs on your system.
 
-### _Approach #1: Installation from PyPI_
-
-Urlup is [available from PyPI](https://pypi.org/project/urlup).  If you use `pip` with your Python, you can install Urlup using this command line:
-```sh
-sudo python3 -m pip install urlup
+On **Linux**, **macOS**, and **Windows** operating systems, you should be able to install `urlup` with [`pip`](https://pip.pypa.io/en/stable/installing/).  To install `urlup` from the [Python package repository (PyPI)](https://pypi.org), run the following command:
+```
+python3 -m pip install urlup
 ```
 
-### _Approach #2: Installation from this GitHub repository_
-
-The following is a simple and direct way to install `urlup` on your computer from this GitHub repository:
+As an alternative to getting it from [PyPI](https://pypi.org), you can use `pip` to install `urlup` directly from GitHub, like this:
 ```sh
-sudo python3 -m pip install git+https://github.com/caltechlibrary/urlup.git
+python3 -m pip install git+https://github.com/caltechlibrary/urlup.git
 ```
-
-Alternatively, you can clone this GitHub repository and then run `setup.py`:
-```sh
-git clone https://github.com/caltechlibrary/urlup.git
-cd urlup
-sudo pip3 install .
-```
-
-Both of the last two installation approaches should automatically install some Python dependencies that `urlup` relies upon, namely [plac](https://pypi.python.org/pypi/plac), [termcolor](https://pypi.python.org/pypi/termcolor) and [uritools](https://pypi.org/project/uritools/).
 
 
 ▶︎ Basic operation

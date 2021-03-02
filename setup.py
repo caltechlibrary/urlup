@@ -41,7 +41,7 @@ setup(
     author_email     = version['__email__'],
     license          = version['__license__'],
     url              = version['__url__'],
-    download_url     = 'https://github.com/caltechlibrary/urlup/archive/1.1.0.tar.gz',
+    download_url     = 'https://github.com/caltechlibrary/urlup/archive/1.5.0.tar.gz',
     keywords         = "http redirects URL",
     packages         = ['urlup'],
     scripts          = ['bin/urlup'],
