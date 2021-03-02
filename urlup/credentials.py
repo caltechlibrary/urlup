@@ -9,8 +9,8 @@ Michael Hucka <mhucka@caltech.edu> -- Caltech Library
 Copyright
 ---------
 
-Copyright (c) 2018 by the California Institute of Technology.  This code is
-open-source software released under a 3-clause BSD license.  Please see the
+Copyright (c) 2018-2021 by the California Institute of Technology.  This code
+is open-source software released under a 3-clause BSD license.  Please see the
 file "LICENSE" for more information.
 '''
 
@@ -81,11 +81,11 @@ def obtain_credentials(service, display_name,
         # If we're given a service, retrieve the stored (if any) for defaults.
         (s_user, s_pswd, s_host, s_port) = get_credentials(service)
 
-    if host is not -1 and not host:
+    if host != -1 and not host:
         host = s_host or input("{} host (default: {}): ".format(display_name,
                                                                 default_host))
         host = host or default_host
-    if port is not -1 and not port:
+    if port != -1 and not port:
         port = s_port or input("{} port (default: {}): ".format(display_name,
                                                                 default_port))
         port = port or default_port
