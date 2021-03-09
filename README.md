@@ -11,7 +11,7 @@ Urlup is a utility program and Python 3 package to dereference URLs and determin
 [![Python](https://img.shields.io/badge/Python-3.6+-brightgreen.svg?style=flat-square)](http://shields.io)
 [![PyPI](https://img.shields.io/pypi/v/urlup.svg?style=flat-square&color=yellow)](https://pypi.org/project/urlup/)
 [![Latest release](https://img.shields.io/github/v/release/caltechlibrary/urlup.svg?style=flat-square&color=b44e88)](https://github.com/caltechlibrary/urlup/releases)
-[![DOI](http://img.shields.io/badge/DOI-10.22002%20%2F%20D1.1897-blue.svg?style=flat-square)](https://data.caltech.edu/records/1904)
+[![DOI](http://img.shields.io/badge/DOI-10.22002%20%2F%20D1.1904-blue.svg?style=flat-square)](https://data.caltech.edu/records/1904)
 
 
 ☀ Introduction
