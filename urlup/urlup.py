@@ -61,7 +61,7 @@ if __debug__:
 # Global constants.
 # .............................................................................
 
-_NETWORK_TIMEOUT = 10
+_NETWORK_TIMEOUT = 20
 '''
 How long to wait on a network connection attempt.
 '''
@@ -76,6 +76,11 @@ _MAX_RETRIES = 3
 '''
 Maximum number of times a network operation is tried before this module stops
 trying and exits with an error.
+'''
+
+_DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0'
+'''
+Fake agent header for interacting with EZProxy over the network.
 '''
 
 
@@ -177,10 +182,11 @@ def _analysis(url, cookies, headers, proxy_helper):
         if proxy_helper.url_contains_proxy(starting_url):
             if __debug__: log('URL uses a proxy: {}'.format(starting_url))
             using_proxy = True
-            real_url = proxy_helper.proxied_url(starting_url)
             cookie_jar = proxy_helper.cookies(starting_url)
             requests.utils.add_dict_to_cookiejar(cookie_jar, cookies)
-            conn = requests.get(real_url, cookies = cookie_jar,
+            if 'User-Agent' not in headers:
+                headers['User-Agent'] = _DEFAULT_USER_AGENT
+            conn = requests.get(starting_url, cookies = cookie_jar,
                                 headers = headers, timeout = _NETWORK_TIMEOUT)
             code = conn.status_code
             ending_url = conn.url
