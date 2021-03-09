@@ -1,6 +1,12 @@
 Change log for Urlup
 ====================
 
+Version 1.5.1
+-------------
+
+* Fix bug in dereferencing proxied URLs.
+
+
 Version 1.5.0
 -------------
 
